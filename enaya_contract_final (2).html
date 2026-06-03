@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام اتفاقيات عناية الصحية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1e6b45;--green2:#27875a;--green3:#e8f5ee;--green4:#c8e6d5;
+  --gold:#c9a84c;--gold2:#f0d080;
+  --dark:#1a1a1a;--gray:#6b7280;--light:#f8f9fa;--border:#e5e7eb;
+  --white:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',Tahoma,Arial,sans-serif;direction:rtl;background:#f4f6f4;color:var(--dark);min-height:100vh;font-size:14px}
+
+/* ====== APP SHELL ====== */
+#app{max-width:960px;margin:0 auto;padding:1rem}
+
+/* ====== TOPBAR ====== */
+.topbar{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:0;margin-bottom:1rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.topbar-inner{display:flex;align-items:center;gap:14px;padding:14px 20px}
+.topbar-logo{display:flex;align-items:center;gap:10px}
+.logo-img{height:52px;width:auto}
+.logo-divider{width:1px;height:40px;background:var(--border)}
+.topbar-text h1{font-size:15px;font-weight:700;color:var(--green)}
+.topbar-text p{font-size:11px;color:var(--gray);margin-top:1px}
+.topbar-right{margin-right:auto;display:flex;align-items:center;gap:10px}
+.live-pill{display:flex;align-items:center;gap:5px;background:var(--green3);border:1px solid var(--green4);padding:5px 12px;border-radius:100px;font-size:12px;color:var(--green);font-weight:600}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.topbar-strip{background:linear-gradient(135deg,var(--green) 0%,var(--green2) 100%);height:4px}
+
+/* ====== NAV ====== */
+.nav{display:flex;gap:3px;background:var(--white);border-radius:12px;padding:5px;margin-bottom:1rem;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.nav-btn{flex:1;padding:10px 8px;text-align:center;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:var(--gray);border:none;background:none;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;font-family:'Cairo',sans-serif}
+.nav-btn.active{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(30,107,69,.3)}
+.nav-badge{background:#e24b4a;color:#fff;font-size:10px;padding:1px 5px;border-radius:100px}
+
+/* ====== PAGES ====== */
+.page{display:none}.page.active{display:block}
+
+/* ====== CARD ====== */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-title{font-size:14px;font-weight:700;margin-bottom:1.25rem;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;color:var(--green)}
+.card-title i{font-size:18px}
+
+/* ====== FORM ====== */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.span2{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;color:var(--gray);font-weight:600}
+.field input,.field select{
+  padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:13px;background:var(--white);color:var(--dark);
+  font-family:'Cairo',sans-serif;width:100%;transition:border-color .2s;
+  outline:none}
+.field input:focus,.field select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(30,107,69,.1)}
+.req{color:#e24b4a}
+.field-hint{font-size:11px;color:#aaa;margin-top:2px}
+
+/* ====== STEPS ====== */
+.steps-bar{display:flex;align-items:center;background:var(--white);border-radius:12px;padding:14px 20px;border:1px solid var(--border);margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.st{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.st-c{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--border);background:var(--light);color:#aaa;transition:all .3s}
+.st-c.active{background:var(--green);color:#fff;border-color:var(--green);box-shadow:0 2px 8px rgba(30,107,69,.3)}
+.st-c.done{background:#0f6e56;color:#fff;border-color:#0f6e56}
+.st-l{font-size:10px;color:var(--gray);text-align:center;font-weight:600}
+.st-line{flex:1;height:2px;background:var(--border);margin-bottom:16px;border-radius:2px}
+
+/* ====== BUTTONS ====== */
+.btn{padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--dark);display:inline-flex;align-items:center;gap:7px;transition:all .15s;font-family:'Cairo',sans-serif}
+.btn:hover{background:var(--light);border-color:#ccc}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-primary:hover{background:var(--green2)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.25rem;align-items:center}
+
+/* ====== INFO BANNER ====== */
+.info-banner{display:flex;align-items:flex-start;gap:10px;background:var(--green3);border:1px solid var(--green4);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:1rem;font-weight:500}
+
+/* ====== CONTRACT DOCUMENT ====== */
+.contract-wrap{background:#fff;border:1px solid #d0d0c8;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:1rem}
+
+/* Contract header with enaya branding */
+.doc-header{position:relative;background:linear-gradient(135deg,#1e6b45 0%,#27875a 60%,#1e6b45 100%);padding:0;overflow:hidden}
+.doc-header-top{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 16px}
+.doc-header-logo{display:flex;align-items:center;gap:12px}
+.doc-header-logo-circle{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:26px}
+.doc-header-title-block h2{color:#fff;font-size:17px;font-weight:800}
+.doc-header-title-block p{color:rgba(255,255,255,.8);font-size:11px;margin-top:2px}
+.doc-header-num{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 14px;text-align:center}
+.doc-header-num div:first-child{font-size:10px;color:rgba(255,255,255,.7);font-weight:600}
+.doc-header-num div:last-child{font-size:14px;color:#fff;font-weight:800;margin-top:2px}
+.doc-header-strip{height:5px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.4),rgba(255,255,255,.1))}
+
+/* Contract body */
+.doc-body{padding:2.5rem 3rem;direction:rtl;font-size:13.5px;line-height:2;color:#1a1a1a}
+.doc-body h3{text-align:center;font-size:20px;font-weight:800;margin-bottom:.5rem;color:var(--green)}
+.doc-bismillah{text-align:center;font-size:14px;color:var(--gray);margin-bottom:1.5rem;font-style:italic}
+.doc-intro{background:var(--green3);border-right:4px solid var(--green);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:1.5rem;font-size:13px;line-height:1.8}
+
+.art{margin-bottom:1.5rem}
+.art-title{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
+.art-num{background:var(--green);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.art-label{font-size:14px;font-weight:800;color:var(--green)}
+.art-body{padding-right:36px;font-size:13px;line-height:2;color:#2a2a2a}
+.art-body ul{margin-right:1.5rem;margin-top:.5rem}
+.art-body ul li{margin-bottom:.4rem}
+.art-body .sub-title{font-weight:700;color:var(--dark);margin-top:.75rem;margin-bottom:.25rem}
+
+/* Filled value highlight */
+.fv{display:inline;background:#e8f5ee;border-bottom:2px solid var(--green);padding:0 6px 1px;color:#1a5c35;font-weight:700;border-radius:2px}
+.fv.mt{background:#fff3e0;border-bottom-color:#e67e22;color:#7d4e00}
+
+/* ====== CONTACT TABLE (Article 14) ====== */
+.contact-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:.75rem}
+.contact-tbl th{background:var(--green);color:#fff;padding:8px 10px;text-align:center;font-weight:700}
+.contact-tbl td{padding:7px 10px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+.contact-tbl tr:nth-child(even) td{background:#f8faf9}
+.contact-tbl .party-cell{background:var(--green3);font-weight:700;color:var(--green);writing-mode:horizontal-tb;text-align:center}
+
+/* ====== SIGNATURE SECTION ====== */
+.sign-section{margin:2rem 0 1rem;padding:2rem;border:2px solid var(--green);border-radius:14px;background:linear-gradient(135deg,#f8fdf9,#f0f9f4)}
+.sign-title{text-align:center;font-size:15px;font-weight:800;color:var(--green);margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:8px}
+.sign-title::before,.sign-title::after{content:'';flex:1;height:1px;background:var(--green4)}
+.parties-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:0;margin-bottom:1.5rem}
+.party-col{padding:0 2rem;text-align:center}
+.party-divider{background:var(--border);margin:0}
+.party-role{font-size:12px;color:var(--gray);font-weight:600;margin-bottom:6px}
+.party-org{font-size:14px;font-weight:800;color:var(--green);margin-bottom:4px}
+.party-rep{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:20px}
+.sig-box{border-bottom:2px solid var(--dark);margin:0 auto 6px;width:80%;height:48px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.sig-label{font-size:11px;color:var(--gray)}
+.stamp-box{border:1.5px dashed var(--border);border-radius:8px;width:80%;margin:8px auto;height:44px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#ccc}
+.party-status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;margin-bottom:10px}
+.badge-done{background:#EAF3DE;color:#2d7d4f;border:1px solid #97C459}
+.badge-wait{background:#fff8e1;color:#f9a825;border:1px solid #f9a825}
+
+/* ====== ESIGN INPUT ====== */
+.esign-wrap{border:2px dashed var(--green);border-radius:12px;padding:1.5rem;text-align:center;background:#fafffe;margin:1rem 0}
+.esign-label{font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px}
+.esign-input{
+  border:none;border-bottom:2.5px solid var(--green);background:transparent;
+  text-align:center;font-size:24px;font-family:Georgia,serif;
+  width:70%;padding:8px;color:#1a5c35;outline:none;font-style:italic;
+  font-weight:400}
+.esign-hint{font-size:11px;color:var(--gray);margin-top:8px}
+
+/* ====== PROGRESS ====== */
+.prog-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.prog-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:var(--light);border:1px solid var(--border);transition:all .4s}
+.prog-item.done{background:#EAF3DE;border-color:#97C459}
+.prog-ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:#fff;border:1px solid var(--border);transition:all .3s}
+.prog-item.done .prog-ico{background:var(--green);border-color:var(--green)}
+.prog-txt{flex:1;font-size:13px;font-weight:500;color:var(--gray)}
+.prog-item.done .prog-txt{color:var(--green);font-weight:600}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spinning{animation:spin .8s linear infinite}
+
+/* ====== SUCCESS ====== */
+.success-block{display:none;text-align:center;padding:2rem}
+.success-block.show{display:block}
+
+/* ====== LIST ====== */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat-n{font-size:26px;font-weight:800;color:var(--green)}
+.stat-l{font-size:11px;color:var(--gray);margin-top:2px;font-weight:600}
+
+.clist{display:flex;flex-direction:column;gap:8px}
+.crow{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.crow:hover{border-color:var(--green);box-shadow:0 3px 12px rgba(30,107,69,.12);transform:translateY(-1px)}
+.crow-av{width:40px;height:40px;border-radius:50%;background:var(--green3);border:1.5px solid var(--green4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--green);flex-shrink:0}
+.crow-info{flex:1;min-width:0}
+.crow-name{font-size:14px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow-meta{font-size:11px;color:var(--gray);margin-top:2px;font-weight:500}
+.badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;display:inline-block}
+.b-sent{background:#E6F1FB;color:#185FA5;border:1px solid #B5D4F4}
+.b-signed{background:#EAF3DE;color:#2d7d4f;border:1px solid #97C459}
+
+/* ====== DETAIL ====== */
+.detail-view{display:none}.detail-view.open{display:block}
+.back-btn{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--gray);margin-bottom:1rem;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--white)}
+.back-btn:hover{border-color:var(--green);color:var(--green)}
+.info-tbl{width:100%;font-size:13px;border-collapse:collapse}
+.info-tbl td{padding:9px 4px;border-bottom:1px solid var(--border)}
+.info-tbl td:first-child{color:var(--gray);width:150px;font-weight:600}
+.info-tbl td:last-child{font-weight:600}
+.info-tbl tr:last-child td{border-bottom:none}
+.tl{display:flex;flex-direction:column}
+.tl-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.tl-row:last-child{border-bottom:none}
+.tl-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.dot-g{background:var(--green)}.dot-b{background:#185FA5}.dot-a{background:#f9a825}
+.tl-txt{flex:1;font-size:13px;color:var(--gray);font-weight:500}
+.tl-time{font-size:11px;color:#aaa}
+
+/* ====== CHANNEL TOGGLE ====== */
+.ch-row{display:flex;gap:10px;margin:12px 0}
+.ch{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-size:13px;font-weight:700;color:var(--gray);background:var(--white);transition:all .15s;user-select:none;font-family:'Cairo',sans-serif}
+.ch.on-wa{border-color:var(--green);color:var(--green);background:var(--green3)}
+.ch.on-em{border-color:#185FA5;color:#185FA5;background:#E6F1FB}
+.msg-preview{background:var(--light);border-radius:10px;padding:14px 16px;font-size:12.5px;color:#444;line-height:2;border-right:4px solid var(--green);margin-top:12px;font-weight:500}
+
+/* ====== TOAST ====== */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--white);border:1.5px solid var(--green4);border-radius:12px;padding:14px 20px;font-size:13px;color:var(--green);z-index:9999;direction:rtl;box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;font-weight:700;animation:toastIn .3s ease}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+@media(max-width:640px){
+  .grid2{grid-template-columns:1fr}.span2{grid-column:1}
+  .parties-grid{grid-template-columns:1fr}.party-divider{display:none}
+  .doc-body{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ====== TOPBAR ====== -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-logo">
+      <img src="https://enayah.sa/wp-content/uploads/sites/2123/2022/05/شعار-جمعية-عناية-جديد-1.png"
+           onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex'"
+           class="logo-img" alt="عناية">
+      <div id="logo-fallback" style="display:none;width:52px;height:52px;border-radius:50%;background:var(--green3);border:2px solid var(--green4);align-items:center;justify-content:center;font-size:24px">🏥</div>
+      <div class="logo-divider"></div>
+      <div class="topbar-text">
+        <h1>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</h1>
+        <p>نظام إرسال الاتفاقيات الصحية الإلكترونية — علاج ووقاية</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><div class="live-dot"></div> مباشر</div>
+    </div>
+  </div>
+  <div class="topbar-strip"></div>
+</div>
+
+<!-- ====== NAV ====== -->
+<div class="nav">
+  <button class="nav-btn active" onclick="goPage('send',this)">📤 إرسال اتفاقية جديدة</button>
+  <button class="nav-btn" onclick="goPage('list',this)">📋 الاتفاقيات المرسلة <span class="nav-badge" id="nb">0</span></button>
+  <button class="nav-btn" onclick="goPage('client',this)">👁 معاينة صفحة العميل</button>
+</div>
+
+<!-- ====================================================
+     PAGE: SEND
+===================================================== -->
+<div class="page active" id="page-send">
+
+  <div class="steps-bar">
+    <div class="st"><div class="st-c active" id="sc1">١</div><div class="st-l">بيانات الطرف الثاني</div></div>
+    <div class="st-line"></div>
+    <div class="st"><div class="st-c" id="sc2">٢</div><div class="st-l">مراجعة الاتفاقية كاملةً</div></div>
+    <div class="st-line"></div>
+    <div class="st"><div class="st-c" id="sc3">٣</div><div class="st-l">طريقة الإرسال</div></div>
+    <div class="st-line"></div>
+    <div class="st"><div class="st-c" id="sc4">٤</div><div class="st-l">تأكيد الإرسال</div></div>
+  </div>
+
+  <!-- ---- STEP 1: Form ---- -->
+  <div id="s1">
+    <div class="card">
+      <div class="card-title">🏥 بيانات الطرف الثاني — المنشأة الصحية الشريكة</div>
+      <div class="grid2">
+        <div class="field span2">
+          <label>اسم الشركة / المنشأة الصحية <span class="req">*</span></label>
+          <input id="f_company" placeholder="مستشفى / عيادة / مركز صحي / شركة طبية..." oninput="chk1()"/>
+        </div>
+        <div class="field">
+          <label>رقم الترخيص التجاري</label>
+          <input id="f_lic" placeholder="1010xxxxxx"/>
+        </div>
+        <div class="field">
+          <label>العنوان التفصيلي</label>
+          <input id="f_addr" placeholder="حي — طريق — مدينة الرياض"/>
+        </div>
+        <div class="field">
+          <label>اسم ممثل التوقيع <span class="req">*</span></label>
+          <input id="f_rep" placeholder="د. / أ. الاسم الكامل" oninput="chk1()"/>
+        </div>
+        <div class="field">
+          <label>المسمى الوظيفي</label>
+          <input id="f_jobtitle" placeholder="المدير العام / الرئيس التنفيذي"/>
+        </div>
+        <div class="field">
+          <label>رقم جوال ممثل التوقيع <span class="req">*</span></label>
+          <input id="f_phone" placeholder="05xxxxxxxx" oninput="chk1()"/>
+        </div>
+        <div class="field">
+          <label>البريد الإلكتروني <span class="req">*</span></label>
+          <input id="f_email" type="email" placeholder="name@hospital.sa" dir="ltr" oninput="chk1()"/>
+        </div>
+        <div class="field">
+          <label>هاتف المنشأة الثابت</label>
+          <input id="f_tel" placeholder="011xxxxxxx"/>
+        </div>
+        <div class="field">
+          <label>صندوق البريد (ص.ب)</label>
+          <input id="f_po" placeholder="رقم ص.ب"/>
+        </div>
+        <div class="field">
+          <label>تاريخ الاتفاقية</label>
+          <input id="f_date" type="date"/>
+        </div>
+        <div class="field">
+          <label>رقم الاتفاقية</label>
+          <input id="f_num" placeholder="يُولَّد تلقائياً"/>
+          <div class="field-hint">اتركه فارغاً وسيُرقَّم تلقائياً</div>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="btn1" disabled onclick="goS2()">مراجعة الاتفاقية كاملةً ←</button>
+      <span style="font-size:12px;color:#aaa;font-weight:500">* حقول إلزامية</span>
+    </div>
+  </div>
+
+  <!-- ---- STEP 2: Full Contract Preview ---- -->
+  <div id="s2" style="display:none">
+    <div class="info-banner">✅ راجع الاتفاقية — البيانات الخضراء هي بيانات الطرف الثاني المدخلة. تحقق منها ثم اضغط "التالي".</div>
+
+    <div class="contract-wrap">
+      <!-- Doc Header -->
+      <div class="doc-header">
+        <div class="doc-header-top">
+          <div class="doc-header-logo">
+            <div class="doc-header-logo-circle">🏥</div>
+            <div class="doc-header-title-block">
+              <h2>اتفاقية صحية</h2>
+              <p>الجمعية الخيرية الصحية لرعاية المرضى (عناية) — علاج ووقاية</p>
+            </div>
+          </div>
+          <div class="doc-header-num">
+            <div>رقم الاتفاقية</div>
+            <div id="cv_num_disp">HC-2026-—</div>
+          </div>
+        </div>
+        <div class="doc-header-strip"></div>
+      </div>
+
+      <!-- Doc Body -->
+      <div class="doc-body">
+        <h3>اتفاقية صحية</h3>
+        <div class="doc-bismillah">بعون الله تعالى</div>
+
+        <div class="doc-intro">
+          وفي يوم <span class="fv" id="cv_date">—</span> الموافق <span class="fv" id="cv_hijri">—</span>هـ، بمدينة الرياض، تم إبرام هذه الاتفاقية الصحية بين الجمعية الخيرية الصحية لرعاية المرضى (عناية) بوصفها الطرف الأول، ومنشأة <span class="fv" id="cv_company_h">—</span> بوصفها الطرف الثاني، وفقاً للشروط والأحكام المبيَّنة فيما يلي.
+        </div>
+
+        <!-- Article 1 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١</div><div class="art-label">الطرف الأول (الجمعية):</div></div>
+          <div class="art-body">
+            الجمعية الخيرية الصحية لرعاية المرضى (<strong>عناية</strong>) — المسجلة بالمركز الوطني لتنمية القطاع غير الربحي بموجب ترخيص رقم <strong>(٣٦٤)</strong> وتاريخ ٠٣/٠١/١٤٢٨هـ، وعنوانها حي الربوة، مدينة الرياض، هاتف <strong>٩٢٠٠٢١٢٢٨</strong>، فاكس <strong>٠٠٩٦٦١١٤٩٦٨٣٣٨</strong>، ص.ب <strong>١١٥٨٨</strong> الرياض <strong>٧٥٨٩٥</strong>. ويمثلها الدكتور / <strong>سلمان بن عبد الله المطيري</strong> (الأمين العام)، بريد إلكتروني: info@enayah.org.sa — ويشار إليها في ثنايا هذه الاتفاقية بـ (<strong>الجمعية</strong>) أو (<strong>الطرف الأول</strong>).
+          </div>
+        </div>
+
+        <div class="art">
+          <div class="art-title"><div class="art-num" style="background:#555">٢</div><div class="art-label" style="color:#555">الطرف الثاني (المنشأة الصحية الشريكة):</div></div>
+          <div class="art-body">
+            شركة / <span class="fv" id="cv_company">—</span> &nbsp;·&nbsp;
+            ترخيص رقم: <span class="fv" id="cv_lic">—</span> &nbsp;·&nbsp;
+            عنوانها مدينة الرياض <span class="fv" id="cv_addr">—</span> &nbsp;·&nbsp;
+            هاتف: <span class="fv" id="cv_tel">—</span> &nbsp;·&nbsp;
+            ص.ب: <span class="fv" id="cv_po">—</span><br>
+            ويمثلها في التوقيع: <strong><span class="fv" id="cv_rep">—</span></strong>
+            (<span class="fv" id="cv_jobtitle">—</span>) &nbsp;·&nbsp;
+            جوال: <span class="fv" id="cv_phone">—</span> &nbsp;·&nbsp;
+            بريد إلكتروني: <span class="fv" id="cv_email" dir="ltr">—</span><br>
+            — ويشار إليها في ثنايا هذه الاتفاقية بـ (<strong>الشريك</strong>) أو (<strong>الطرف الثاني</strong>).
+          </div>
+        </div>
+
+        <!-- Preamble -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">تم</div><div class="art-label">تمهيد:</div></div>
+          <div class="art-body">
+            حيث إن الطرف الأول جمعية عناية الصحية جمعية أهلية مرخصة، تعنى بتقديم الخدمات العلاجية للمستفيدين المستحقين، والإسهام في تعزيز المسؤولية الاجتماعية من خلال بناء الشراكات مع الجهات الصحية ذات العلاقة. وحيث إن الطرف الثاني (<span class="fv" id="cv_company_p">—</span>) منشأة صحية مرخصة من الجهات الحكومية المختصة، وتتوفر لديه الإمكانات الطبية والتأهيلية والقدرات التشغيلية اللازمة لتقديم الخدمات الصحية للمستفيدين وفقاً للنظام التقني المعتمد لدى الطرف الأول، وحيث أبدى الطرفان رغبتهما في التعاون المشترك لتقديم الخدمات الصحية والتأهيلية للمستفيدين المحالين بالتكلفة المعتمدة لديه، وفقاً للشروط والأحكام الواردة في هذه الاتفاقية، فقد اتفق الطرفان وهما بكامل أهليتهما الشرعية والنظامية على ما يلي:
+          </div>
+        </div>
+
+        <!-- Art 1 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١</div><div class="art-label">المادة (١): التمهيد</div></div>
+          <div class="art-body">يعد التمهيد أعلاه جزءاً لا يتجزأ من الاتفاقية ومكملاً ومتمماً لمواده.</div>
+        </div>
+
+        <!-- Art 2 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٢</div><div class="art-label">المادة (٢): موضوع الاتفاقية</div></div>
+          <div class="art-body">
+            تهدف هذه الاتفاقية إلى تنظيم أوجه التعاون بين الطرفين في تقديم الخدمات الصحية وتعزيز المسؤولية المجتمعية، وذلك من خلال المسارات التالية:
+            <div class="sub-title">أولاً: الشراكة في مجال العلاج</div>
+            <ul>
+              <li>التعاون في تقديم الخدمات الطبية التخصصية للمستفيدين المعتمدين من قبل الطرف الأول عبر المنصة الإلكترونية المعتمدة لديه، وذلك وفق الإمكانيات الطبية والتشغيلية المتاحة لدى الطرف الثاني.</li>
+              <li>يحق للطرف الثاني الاعتذار عن استقبال أو علاج بعض الحالات التي تتطلب خدمات أو إجراءات طبية غير متوفرة لديه أو في حال وجود اعتبارات طبية تستدعي ذلك، على أن يتم إشعار الطرف الأول بذلك مع تزويده — عند الحاجة — بتقرير طبي يوضح أسباب الاعتذار والإجراء أو الجهة العلاجية البديلة المناسبة إن أمكن.</li>
+            </ul>
+            <div class="sub-title">ثانياً: الشراكة في مجال التسويق والإعلام</div>
+            <ul>
+              <li>التعاون في نشر المواد التعريفية الخاصة بالطرف الأول، إضافةً إلى المواد التوعوية الصحية، داخل منشآت الطرف الثاني وفق الضوابط والسياسات المعتمدة لدى الطرفين.</li>
+              <li>توثيق قصص النجاح والحالات المستفيدة التي تم علاجها أو تأهيلها داخل منشآت الطرف الثاني بعد الحصول على الموافقات النظامية اللازمة من المستفيدين، وبما يراعي خصوصيتهم وسرية بياناتهم الصحية.</li>
+              <li>استخدام شعارات الطرفين في المبادرات والأنشطة المشتركة وفق الهوية المعتمدة وبعد التنسيق المسبق بين الطرفين.</li>
+            </ul>
+            <div class="sub-title">ثالثاً: الشراكة في مجال الأنشطة والبرامج التطوعية</div>
+            <ul>
+              <li>التعاون في تنفيذ المبادرات والبرامج والأنشطة الصحية المشتركة التي تسهم في خدمة المجتمع وتحقيق الأهداف الصحية للطرفين.</li>
+              <li>دعم مشاركة الأطباء والممارسين الصحيين من منسوبي الطرف الثاني في البرامج والمبادرات الصحية التطوعية التي ينفذها الطرف الأول، وذلك وفق الإمكانيات المتاحة والأنظمة المنظمة لذلك.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Art 3 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٣</div><div class="art-label">المادة (٣): التزامات الطرف الأول</div></div>
+          <div class="art-body">
+            <ul>
+              <li>إحالة الحالات المستحقة التي تنطبق عليها معايير الاستفادة المعتمدة لدى الطرف الثاني إلى الطرف الأول وفق الإجراءات والضوابط المعتمدة، بما يشمل تزويد الطرف الثاني بالبيانات والمستندات اللازمة للمستفيدين المحالين بما يشمل التقارير الطبية والتعاميد والموافقات ذات العلاقة عبر النظام التقني المعتمد.</li>
+              <li>الالتزام بسداد تكاليف الخدمات العلاجية المعتمدة بموجب التعاميد الصادرة وذلك وفقاً لأحكام المادتين الثامنة والتاسعة من هذه الاتفاقية.</li>
+              <li>متابعة الحالات المحالة والتنسيق مع الطرف الثاني لضمان تنفيذ الخطة العلاجية المعتمدة في حال عدم تحديث حالة الطلب.</li>
+              <li>الإسهام في تنفيذ البرامج والأنشطة المشتركة ذات العلاقة بالتوعية الصحية والمبادرات المجتمعية وفق ما يتفق عليه الطرفان والإمكانيات المتاحة.</li>
+              <li>التنسيق الإعلامي والإداري واللوجستي للفعاليات والبرامج المشتركة بما يشمل إعداد المواد التوعوية وترتيبات التنفيذ عند الحاجة.</li>
+              <li>إنشاء حساب للطرف الثاني على النظام التقني المعتمد وتزويده ببيانات الدخول اللازمة لاستخدامه.</li>
+              <li>تزويد الطرف الثاني بالأدلة الإجرائية والمواد التوضيحية اللازمة لتمكينه من استخدام المنصة الإلكترونية وآلية العمل عليها.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Art 4 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٤</div><div class="art-label">المادة (٤): التزامات الطرف الثاني</div></div>
+          <div class="art-body">
+            <ul>
+              <li>تزويد الطرف الأول بقائمة الخدمات الطبية وأسعارها هو وفق نموذج عرض الأسعار المعتمد لدى الطرف الأول، متضمنةً تفاصيل الأسعار قبل الخصم وبعده، وأكواد نفيس أو أي أكواد تصنيف معتمدة، على أن تخضع للاعتماد النهائي من الطرف الأول.</li>
+              <li>تقديم الخدمات العلاجية للمستفيدين المعتمدين من الطرف الأول وفقاً للأنظمة الصحية المعمول بها في المملكة وبما يتوافق مع معايير الجودة وسلامة المرضى المعتمدة.</li>
+              <li>استقبال المستفيدين الصادر لهم تعميد من الطرف الأول وفق الآلية التقنية المعتمدة بالطرف الأول والالتزام بالتكلفة المالية المعتمدة.</li>
+              <li>إعداد خطة علاجية واضحة لكل حالة طبية قبل البدء في أي إجراء أو خدمة علاجية، ما لم تكن الحالة طارئةً طارئة وتستتطلب تدخلاً عاجلاً، مع الالتزام باستكمال الإجراءات الطبية والمالية خلال المدد الزمنية المحددة للمادة الثامنة والتاسعة من هذه الاتفاقية.</li>
+              <li>الالتزام باستكمال الإجراءات الطبية والمالية خلال المدد الزمنية المحددة للمادتين الثامنة والتاسعة، واستثناء بعض الخدمات الطبية ذات الطبيعة الممتدة — مثل العلاج الطبيعي والولادة وغسيل الكلى والأورام — أو أي خدمات أخرى يتفق عليها الطرفان كتابياً.</li>
+              <li>تقديم فواتير نظامية ومستندات مكتملة لكل مطالبة مالية وفق متطلبات هيئة الزكاة والضريبة والجمارك ووفقاً لما ورد في المادة الثامنة من هذه الاتفاقية.</li>
+              <li>المساهمة في دعم استدامة المشاريع الصحية للطرف الأول من خلال سداد نسبة الاستثمار الاجتماعي المتفق عليها والبالغة (٥٪) من صافي قيمة الحوالات الشهرية المحولة للطرف الثاني بعد خصم ضريبة القيمة المضافة، وذلك وفق الآلية الزمنية المتفق عليها بين الطرفين.</li>
+              <li>التعاون مع الطرف الأول في تنفيذ المبادرات والأنشطة التطوعية والفعاليات الصحية المشتركة مع الالتزام بالأنظمة والتنظيمية المهنية وضمان سلامة المستفيدين وعدم تجاوز تكاليف المتطوعين بأي مهام تتجاوز نطاق تراخيصهم المهنية أو اختصاصاتهم.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Art 5 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٥</div><div class="art-label">المادة (٥): التقييم والمعايير</div></div>
+          <div class="art-body">يخضع الطرف الثاني لتقييم دوري من قبل الطرف الأول لقياس مستوى الالتزام وجودة الأداء ويشمل ذلك — على سبيل المثال لا الحصر — جودة الخدمات الطبية المقدمة وكفاءة الإجراءات المالية والالتزام بالمدد الزمنية وفقاً للمؤشرات المعتمدة لدى الطرف الأول وفي حال وجود قصور جوهري أو تكرار عدم الالتزام بالمعايير المتفق عليها يحق للطرف الأول اتخاذ الإجراءات المناسبة.</div>
+        </div>
+
+        <!-- Art 6 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٦</div><div class="art-label">المادة (٦): مدة الاتفاقية</div></div>
+          <div class="art-body">تكون مدة هذه الاتفاقية سنة واحدة ميلادية تبدأ من تاريخ توقيعها من الطرفين، وتتجدد تلقائياً لمدة مماثلة ما لم يُشعر أحد الطرفين الآخر كتابةً برغبته في عدم التجديد قبل انتهاء مدة الاتفاقية بما لا يقل عن (٣٠) ثلاثين يوماً.</div>
+        </div>
+
+        <!-- Art 7 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٧</div><div class="art-label">المادة (٧): إنهاء الاتفاقية</div></div>
+          <div class="art-body">يحق لأي من الطرفين إنهاء هذه الاتفاقية أثناء سريانها بموجب إشعار خطي يوجه إلى الطرف الآخر بما لا يقل عن (٣٠) ثلاثين يوماً، ولا يترتب على إنهاء الاتفاقية أو انتهاء مدتها سقوط أي حقوق مالية أو التزامات تعاقدية نشأت خلال فترة سريانها ويلتزم الطرفان باستكمال ومعالجة الالتزامات القائمة قبل تاريخ الإنهاء ما لم يتفق الطرفان على خلاف ذلك كتابةً.</div>
+        </div>
+
+        <!-- Art 8 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٨</div><div class="art-label">المادة (٨): المدد الزمنية ومتطلبات المطالبات المالية</div></div>
+          <div class="art-body">
+            <div class="sub-title">أولاً: المدد الزمنية لمراحل الخدمة</div>
+            يلتزم الطرف الثاني بالتقيد بالمدد الزمنية التالية لكل طلب علاجي صادر من الطرف الأول عبر النظام التقني المعتمد:
+            <ul>
+              <li><strong>مرحلة تأكيد الاستقبال وبدء الخدمة:</strong> يجب على الطرف الثاني تأكيد استقبال المستفيد والبدء في تقديم الخدمة خلال مدة لا تتجاوز (٧) سبعة أيام من تاريخ إصدار التعميد.</li>
+              <li><strong>مرحلة تقديم الخدمة العلاجية:</strong> يلتزم الطرف الثاني بإتمام تقديم الخدمة العلاجية خلال مدة لا تتجاوز (٣٠) ثلاثين يوماً من تاريخ تأكيد الاستقبال وبدء الخدمة.</li>
+              <li><strong>مرحلة رفع المطالبة المالية:</strong> يلتزم الطرف الثاني برفع المطالبات المالية والمستندات المطلوبة خلال مدة لا تتجاوز (١٠) عشرة أيام من تاريخ اكتمال الخدمة.</li>
+            </ul>
+            <div class="sub-title">ثانياً: المستندات المطلوبة للمطالبات المالية</div>
+            يلتزم الطرف الثاني برفع المستندات التالية عبر النظام التقني المعتمد لاستكمال المطالبة المالية:
+            <ul>
+              <li><strong>الفاتورة الإلكترونية:</strong> فاتورة إلكترونية مستوفية لمتطلبات هيئة الزكاة والضريبة والجمارك تتضمن: (اسم مزود الخدمة، رقم وتاريخ الفاتورة، اسم المستفيد، قيمة الخدمة قبل الخصم وبعده، نسبة ضريبة القيمة المضافة، الاسم الطرف الأول، رمز الاستجابة السريع / QR Code، ختم الفاتورة الإلكترونية، ختم مزود الخدمة).</li>
+              <li><strong>التقرير الطبي الختامي:</strong> تقرير طبي صادر من الطرف الثاني يثبت استكمال المستفيد للخدمة العلاجية، ويتضمن: (اسم المستفيد، رقم الهوية أو الإقامة، تاريخ الدخول والخروج، اسم الطبيب المعالج أو المشرف، وصف الإجراءات الطبية المقدمة، نتيجة الإجراء أو الخطة العلاجية النهائية).</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Art 9 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">٩</div><div class="art-label">المادة (٩): أحكام المطالبات المالية</div></div>
+          <div class="art-body">
+            <ul>
+              <li>يتم اعتماد العمل على المنصة الإلكترونية الخاصة بالطرف الأول — النظام — في جميع الإجراءات والاستشارات الطبية والتعاميد والمطالبات المالية لجميع مستفيدي الطرف الأول وفي حال لم يتم الالتزام بهذه الالتزامات الزمنية فإنه يتم تطبيق ما ورد في المادة الثامنة الثامنة فيما يخص الفترات الزمنية وإلغاء التعميد.</li>
+              <li>يسدد الطرف الأول مستحقات الطرف الثاني خلال أربعة عشر يوماً من تاريخ تقديم المطالبة بشكل صحيح عن طريق التحويل البنكي لحساب الطرف الثاني المعتمد لدى الطرف الأول ولا يمكن تقديم مطالبة مالية أكثر من مرة لنفس الطلب.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Art 10 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١٠</div><div class="art-label">المادة (١٠): القوة القاهرة</div></div>
+          <div class="art-body">يقصد بالقوة القاهرة كل حدث استثنائي خارج عن إرادة الطرفين، لا يمكن توقعه أو دفعه أو تلافي آثاره، ويترتب عليه استحالة تنفيذ الالتزامات الواردة في هذه الاتفاقية كلياً أو جزئياً، ويشمل ذلك — على سبيل المثال لا الحصر — الكوارث الطبيعية، والحروب، والاضطرابات العامة، والأوبئة، والانقطاعات التقنية الشاملة، والقرارات أو الإجراءات الحكومية التي تحول دون تنفيذ الالتزامات.</div>
+        </div>
+
+        <!-- Art 11 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١١</div><div class="art-label">المادة (١١): الأخطاء الطبية</div></div>
+          <div class="art-body">يتحمل الطرف الثاني كامل المسؤولية المهنية والنظامية عن أي أخطاء طبية أو ممارسات مهنية غير سليمة تنشأ عن تقديمه الخدمات الصحية للمستفيدين، وذلك وفق الأنظمة والتعليمات المعمول بها في المملكة العربية السعودية.</div>
+        </div>
+
+        <!-- Art 12 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١٢</div><div class="art-label">المادة (١٢): الأنظمة المعمول بها</div></div>
+          <div class="art-body">تخضع هذه الاتفاقية وتفسر وفق الأنظمة واللوائح المعمول بها في المملكة العربية السعودية، وفي حال نشوء أي خلاف أو نزاع بين الطرفين يتعلق بتفسير أو تنفيذ أي من أحكام هذه الاتفاقية، يلتزم الطرفان بالسعي إلى تسويته ودياً خلال مدة مناسبة وفي حال تعذر التوصل إلى حل ودي، يتم اللجوء إلى الجهات القضائية أو القنوات النظامية المختصة في المملكة العربية السعودية للفصل في النزاع.</div>
+        </div>
+
+        <!-- Art 13 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١٣</div><div class="art-label">المادة (١٣): أحكام عامة</div></div>
+          <div class="art-body">
+            <ul>
+              <li>لا يلتزم الطرف الأول بسداد أي مطالبات مالية في الحالات التالية: إذا تم تقديم الخدمة لمستفيد صدر إشعار رسمي من الطرف الأول بإيقاف علاجه قبل تقديم الخدمة / إذا تجاوزت المطالبة المالية قيمة التعميد المحولة للطرف الثاني دون موافقة مسبقة من الطرف الأول / إذا ثبت عدم توافق الخدمة المقدمة مع الخطة العلاجية المعتمدة خلال مرحلة الاستشارة الطبية، ما لم تتم الموافقة المسبقة على التعديل من الطرف الأول / إذا تم تقديم الخدمة العلاجية قبل تاريخ إصدار التعميد.</li>
+              <li>أي تعديل أو إضافة على أحكام هذه الاتفاقية لا يكون نافذاً إلا بموجب ملحق مكتوب وموقع من الطرفين.</li>
+              <li>يُعد أي كشط أو شطب أو تعديل يدوي على هذه الاتفاقية غير معتمد ما لم يتم إقراره كتابياً من الطرفين.</li>
+              <li>يلتزم الطرفان بالمحافظة على سرية المعلومات والبيانات التي يتم تبادلها بموجب هذه الاتفاقية، بما في ذلك البيانات الشخصية والبيانات الصحية للمستفيدين، وذلك وفقاً لأحكام نظام حماية البيانات الشخصية والأنظمة ذات العلاقة في المملكة العربية السعودية.</li>
+              <li>يلتزم كل طرف بتعيين منسق رسمي يتولى متابعة إجراءات التنفيذ والتنسيق بين الطرفين، مع تزويد الطرف الآخر ببيانات التواصل الخاصة به، وتشمل: الاسم، والبريد الإلكتروني، ورقم الجوال.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Art 14: Contact Table -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١٤</div><div class="art-label">المادة (١٤): بيانات التواصل</div></div>
+          <div class="art-body">
+            <table class="contact-tbl">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>المسمى الوظيفي</th>
+                  <th>الاسم</th>
+                  <th>رقم الجوال</th>
+                  <th>البريد الإلكتروني</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="party-cell" rowspan="5">الطرف الأول (عناية)</td>
+                  <td>المنسق الطبي</td><td>أ. مازن غانم</td><td dir="ltr">0507158785</td><td dir="ltr">proj01@enayah.org.sa</td>
+                </tr>
+                <tr><td>إدارة الشراكات</td><td>—</td><td dir="ltr">0561994060</td><td dir="ltr">stratpart@enayah.org.sa</td></tr>
+                <tr><td>مدير الخدمات الصحية</td><td>د. طارق السلطان</td><td dir="ltr">0554477442</td><td dir="ltr">t.z.m.alsultan@enayah.org.sa</td></tr>
+                <tr><td>رئيس الحسابات</td><td>أ. هشام عبدالعال</td><td dir="ltr">0520402205</td><td dir="ltr">h.y.abdelaal@enayah.org.sa</td></tr>
+                <tr><td>الأمين العام</td><td>د. سلمان المطيري</td><td dir="ltr">920021228</td><td dir="ltr">info@enayah.org.sa</td></tr>
+                <tr>
+                  <td class="party-cell" rowspan="5">الطرف الثاني</td>
+                  <td>المنسق الطبي</td><td><span class="fv mt" id="ct_rep">—</span></td><td><span class="fv mt" id="ct_phone">—</span></td><td><span class="fv mt" id="ct_email" dir="ltr">—</span></td>
+                </tr>
+                <tr><td>إدارة الشراكات</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>المدير الطبي</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>المدير المالي</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>نائب مدير</td><td>—</td><td>—</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Art 15 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١٥</div><div class="art-label">المادة (١٥): لغة وعدد نسخ الاتفاقية</div></div>
+          <div class="art-body">حُررت هذه الاتفاقية باللغة العربية من نسختين أصليتين، بيد كل طرف نسخة للعمل بموجبها. وإثباتاً لما تقدم، فقد وقع الطرفان على هذه الاتفاقية وهما بكامل أهليتهما الشرعية والنظامية، وذلك في التاريخ الموضح في صدر هذه الاتفاقية.</div>
+        </div>
+
+        <!-- Art 16 -->
+        <div class="art">
+          <div class="art-title"><div class="art-num">١٦</div><div class="art-label">المادة (١٦): الملاحق</div></div>
+          <div class="art-body">يُعد ملحق أسعار الخدمات الصحية المتفق عليها — متضمناً الأسعار الخاصة بالطرف الأول — جزءاً لا يتجزأ من هذه الاتفاقية ومكملاً ومتمماً لها. ولا يجوز إضافة أي خدمة جديدة إلى النظام أو تعديل أسعار الخدمات المعتمدة إلا بعد الاتفاق المسبق بين الطرفين بشكل مكتوب عبر البريد الإلكتروني الرسمي المعتمد من الطرفين أو من خلال ملحق إضافي معتمد من الطرفين.</div>
+        </div>
+
+        <!-- SIGNATURE BLOCK -->
+        <div class="sign-section">
+          <div class="sign-title">صفحة التوقيع الرسمية</div>
+          <div class="parties-grid">
+            <div class="party-col">
+              <div class="party-role">الطرف الأول</div>
+              <div class="party-org">الجمعية الخيرية الصحية لرعاية المرضى (عناية)</div>
+              <div class="party-rep">الدكتور / سلمان بن عبد الله المطيري — الأمين العام</div>
+              <div class="sig-box"></div>
+              <div class="sig-label">التوقيع</div>
+              <div class="stamp-box">الختم الرسمي</div>
+            </div>
+            <div class="party-divider"></div>
+            <div class="party-col">
+              <div class="party-role">الطرف الثاني</div>
+              <div class="party-org" id="cv_company2">—</div>
+              <div class="party-rep" id="cv_rep2">—</div>
+              <div class="sig-box"></div>
+              <div class="sig-label">التوقيع</div>
+              <div class="stamp-box">الختم الرسمي</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /doc-body -->
+    </div><!-- /contract-wrap -->
+
+    <div class="actions">
+      <button class="btn" onclick="goS1()">← تعديل البيانات</button>
+      <button class="btn btn-primary" onclick="goS3()">التالي — طريقة الإرسال ←</button>
+    </div>
+  </div>
+
+  <!-- ---- STEP 3: WhatsApp Ready Message ---- -->
+  <div id="s3" style="display:none">
+    <div class="card">
+      <div class="card-title">💬 رسالة الواتساب — جاهزة للإرسال</div>
+
+      <!-- phone input -->
+      <div style="background:var(--green3);border:1px solid var(--green4);border-radius:10px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">📱</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px">رقم واتساب الطرف الثاني</div>
+          <div style="font-size:13px;color:var(--green);font-weight:600" id="wa_phone_disp">—</div>
+        </div>
+        <div style="font-size:11px;color:#888;font-weight:500">سيُفتح واتساب على هذا الرقم</div>
+      </div>
+
+      <!-- message preview -->
+      <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:8px">معاينة الرسالة:</div>
+      <div class="msg-preview" id="wa_msg_preview" style="font-size:13px;line-height:2;white-space:pre-wrap"></div>
+
+      <!-- copy button -->
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="copyMsg()" id="copyMsgBtn">📋 نسخ الرسالة</button>
+        <span style="font-size:11px;color:#aaa;align-self:center">أو افتح واتساب مباشرة بالزر أدناه</span>
+      </div>
+    </div>
+
+    <!-- main action -->
+    <div style="background:var(--white);border:1.5px solid #25D366;border-radius:14px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(37,211,102,.15)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:28px">💬</span>
+        <div>
+          <div style="font-size:14px;font-weight:700">افتح واتساب بالرسالة جاهزة</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:2px">الرسالة محشية تلقائياً — تضغط إرسال فقط</div>
+        </div>
+      </div>
+      <button onclick="openWA()" style="width:100%;padding:13px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">
+        💬 افتح واتساب وأرسل الاتفاقية
+      </button>
+      <div style="font-size:11px;color:#aaa;text-align:center;margin-top:8px">يفتح واتساب ويب أو تطبيق الجوال — الرسالة جاهزة، تضغط إرسال فقط</div>
+    </div>
+
+    <!-- email section -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:24px">📧</span>
+        <div>
+          <div style="font-size:14px;font-weight:700">إرسال بالإيميل أيضاً (اختياري)</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:2px" id="em_addr_disp">—</div>
+        </div>
+      </div>
+      <button onclick="openEmail()" style="width:100%;padding:10px;background:var(--white);color:#185FA5;border:1.5px solid #185FA5;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">
+        📧 افتح الإيميل بالرسالة جاهزة
+      </button>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="goS2b()">← رجوع</button>
+      <button class="btn btn-primary" onclick="goS4()">✅ تم الإرسال — حفظ في السجل</button>
+    </div>
+  </div>
+
+  <!-- ---- STEP 4: Saved ---- -->
+  <div id="s4" style="display:none">
+    <div class="card">
+      <div class="card-title" id="s4_title">💾 حفظ الاتفاقية في السجل</div>
+      <div class="prog-list">
+        <div class="prog-item" id="pr1"><div class="prog-ico">📄</div><div class="prog-txt">توليد رقم الاتفاقية ورابط التوقيع المشفر</div></div>
+        <div class="prog-item" id="pr2"><div class="prog-ico">💬</div><div class="prog-txt">تسجيل إرسال الواتساب</div></div>
+        <div class="prog-item" id="pr3"><div class="prog-ico">🔒</div><div class="prog-txt">حفظ الاتفاقية في السجل الداخلي</div></div>
+        <div class="prog-item" id="pr4"><div class="prog-ico">🔔</div><div class="prog-txt">تفعيل متابعة حالة التوقيع</div></div>
+      </div>
+      <div class="success-block" id="successBlock">
+        <div style="font-size:52px;margin-bottom:.75rem">✅</div>
+        <div style="font-size:18px;font-weight:800;color:var(--green);margin-bottom:.4rem">تم الحفظ بنجاح!</div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:1.25rem;font-weight:500">الاتفاقية محفوظة في السجل — تابع حالة التوقيع من تبويب "الاتفاقيات"</div>
+        <div style="background:var(--green3);border:1px solid var(--green4);border-radius:10px;padding:12px 20px;font-size:13px;color:var(--green);display:inline-block;margin-bottom:.75rem;font-weight:600" id="s_detail"></div><br>
+        <div style="background:#E6F1FB;border:1px solid #B5D4F4;border-radius:10px;padding:10px 16px;font-size:12px;color:#185FA5;display:inline-block;font-weight:600" id="s_link"></div>
+      </div>
+    </div>
+    <div class="actions" id="afterActions" style="display:none">
+      <button class="btn btn-primary" onclick="freshForm()">+ إرسال اتفاقية جديدة</button>
+      <button class="btn" onclick="goPage('list',null)">📋 عرض الاتفاقيات</button>
+    </div>
+  </div>
+
+</div><!-- /page-send -->
+
+<!-- ====================================================
+     PAGE: LIST
+===================================================== -->
+<div class="page" id="page-list">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-n" id="stat_total">0</div><div class="stat-l">إجمالي الاتفاقيات</div></div>
+    <div class="stat-card"><div class="stat-n" id="stat_sent" style="color:#185FA5">0</div><div class="stat-l">بانتظار التوقيع</div></div>
+    <div class="stat-card"><div class="stat-n" id="stat_signed">0</div><div class="stat-l">موقعة ومكتملة</div></div>
+  </div>
+
+  <div id="listMain">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:14px;font-weight:700;color:var(--green)">الاتفاقيات المرسلة</div>
+        <div style="font-size:12px;color:var(--gray);font-weight:500" id="listSub">—</div>
+      </div>
+      <div id="listBody" style="padding:14px">
+        <div style="text-align:center;padding:2.5rem;color:#aaa;font-size:13px;font-weight:500">لا توجد اتفاقيات — أرسل اتفاقيتك الأولى</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detailMain">
+    <div class="back-btn" onclick="closeDetail()">← رجوع للقائمة</div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<!-- ====================================================
+     PAGE: CLIENT VIEW
+===================================================== -->
+<div class="page" id="page-client">
+  <div class="info-banner">👁 هذه الصفحة كما يراها ممثل المنشأة عند فتح رابط الواتساب أو الإيميل على جهازه</div>
+
+  <div class="contract-wrap">
+    <div class="doc-header">
+      <div class="doc-header-top">
+        <div class="doc-header-logo">
+          <div class="doc-header-logo-circle">🏥</div>
+          <div class="doc-header-title-block">
+            <h2>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</h2>
+            <p>اتفاقية صحية إلكترونية رسمية — آمنة ومشفرة | enayah.sa</p>
+          </div>
+        </div>
+        <div class="doc-header-num">
+          <div>🔒 SSL محمية</div>
+          <div>enayah.sa</div>
+        </div>
+      </div>
+      <div class="doc-header-strip"></div>
+    </div>
+
+    <div class="doc-body">
+      <h3>اتفاقية صحية</h3>
+      <div class="doc-bismillah">رقم: HC-2026-0043 &nbsp;|&nbsp; <span id="clientDate"></span></div>
+
+      <p>تم إبرام هذه الاتفاقية بين <strong>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</strong> (الطرف الأول) و<strong class="fv">مستشفى النور الطبي</strong> (الطرف الثاني) وفقاً للشروط والأحكام التالية...</p>
+
+      <div style="background:var(--light);border-radius:10px;padding:1rem 1.25rem;margin:1rem 0;font-size:12px;color:var(--gray);text-align:center;border:1px dashed var(--border)">
+        [ الاتفاقية الكاملة — ١٦ مادة — تظهر هنا بشكل كامل عند الإرسال الفعلي ]<br>
+        يمكن التمرير لأعلى ولأسفل لقراءة جميع البنود قبل التوقيع
+      </div>
+
+      <!-- ===== DOCUSIGN-STYLE SIGNATURE SECTION ===== -->
+      <div style="margin-top:2rem;border-top:2px solid var(--border);padding-top:1.5rem">
+
+        <!-- header bar like DocuSign -->
+        <div style="background:#f7f8fa;border:1px solid #dde1e7;border-radius:10px;padding:14px 18px;margin-bottom:1.5rem;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:800;color:var(--dark)">التوقيع الإلكتروني الرسمي</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:1px">اتفاقية صحية — الجمعية الخيرية الصحية لرعاية المرضى (عناية)</div>
+          </div>
+          <div style="margin-right:auto;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #dde1e7;border-radius:100px;padding:4px 12px;font-size:11px;color:var(--gray)">
+            <span style="width:6px;height:6px;border-radius:50%;background:#f9a825;display:inline-block"></span> بانتظار توقيعك
+          </div>
+        </div>
+
+        <!-- TWO SIGNERS side by side -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem">
+
+          <!-- Signer 1: Secretary (already signed) -->
+          <div style="border:1.5px solid #d1fae5;border-radius:12px;overflow:hidden;background:#f9fefb">
+            <div style="background:#d1fae5;padding:8px 14px;display:flex;align-items:center;gap:8px">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:800;flex-shrink:0">١</div>
+              <div style="font-size:11px;font-weight:700;color:#065f46">الطرف الأول</div>
+              <div style="margin-right:auto;display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#059669">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                موقّع
+              </div>
+            </div>
+            <div style="padding:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:2px">الجمعية الخيرية الصحية (عناية)</div>
+              <div style="font-size:11px;color:var(--gray);margin-bottom:12px">د. سلمان بن عبد الله المطيري — الأمين العام</div>
+
+              <!-- Secretary signature drawing - realistic Arabic sig -->
+              <div style="background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:8px 12px;margin-bottom:8px;min-height:72px;display:flex;align-items:center;justify-content:center;position:relative">
+                <svg width="180" height="56" viewBox="0 0 180 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+                  <!-- Main signature strokes - Arabic style -->
+                  <path d="M10 42 C16 38 20 30 26 26 C30 23 33 27 36 24 C40 20 42 14 48 16 C52 17 50 24 54 22 C58 19 60 12 66 14 C70 15 69 22 73 20" stroke="#1a3050" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  <path d="M73 20 C77 18 80 12 86 14 C90 16 89 23 93 21 C97 19 100 13 106 15 C110 17 109 24 113 22 C117 19 120 13 126 15 C130 16 129 23 133 21 C137 18 140 13 146 15 C150 17 149 24 153 22 C157 19 160 14 166 16" stroke="#1a3050" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  <!-- Underline -->
+                  <path d="M8 48 C30 46 60 47 90 46 C120 45 150 47 170 46" stroke="#1a3050" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.4"/>
+                  <!-- Loops in signature -->
+                  <path d="M26 26 C24 22 20 20 22 26" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <path d="M66 14 C64 10 60 9 62 14" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <path d="M106 15 C104 11 100 10 102 15" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <path d="M146 15 C144 11 140 10 142 15" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                </svg>
+              </div>
+
+              <!-- Date + timestamp -->
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-size:10px;color:var(--gray)">تاريخ التوقيع</div>
+                  <div style="font-size:11px;font-weight:600;color:var(--dark)" id="sec_sign_date"></div>
+                </div>
+                <div style="text-align:left">
+                  <div style="font-size:10px;color:var(--gray)">التحقق</div>
+                  <div style="font-size:10px;font-weight:600;color:#059669">✓ موثّق</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signer 2: Client (pending) -->
+          <div style="border:1.5px solid #fde68a;border-radius:12px;overflow:hidden;background:#fffdf5" id="signer2_card">
+            <div style="background:#fef3c7;padding:8px 14px;display:flex;align-items:center;gap:8px">
+              <div style="width:22px;height:22px;border-radius:50%;background:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:800;flex-shrink:0">٢</div>
+              <div style="font-size:11px;font-weight:700;color:#92400e">الطرف الثاني</div>
+              <div style="margin-right:auto;font-size:10px;font-weight:700;color:#b45309">⏳ في انتظارك</div>
+            </div>
+            <div style="padding:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:2px">مستشفى النور الطبي</div>
+              <div style="font-size:11px;color:var(--gray);margin-bottom:12px">د. محمد العمري — المدير العام</div>
+
+              <!-- sign area placeholder / result -->
+              <div id="sig2_placeholder" style="background:#fff;border:2px dashed #fbbf24;border-radius:8px;min-height:72px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px" onclick="openSignModal()">
+                <div style="text-align:center">
+                  <div style="font-size:22px;margin-bottom:4px">✍️</div>
+                  <div style="font-size:12px;font-weight:700;color:#b45309">اضغط للتوقيع</div>
+                </div>
+              </div>
+
+              <!-- signed result (hidden until signed) -->
+              <div id="sig2_result" style="display:none;background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:8px 12px;min-height:72px;display:none;align-items:center;justify-content:center;margin-bottom:8px">
+                <canvas id="sig2_preview" width="200" height="56" style="max-width:100%;height:56px"></canvas>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-size:10px;color:var(--gray)">تاريخ التوقيع</div>
+                  <div style="font-size:11px;font-weight:600;color:#aaa" id="cli_sign_date">—</div>
+                </div>
+                <div style="text-align:left" id="cli_verify_status">
+                  <div style="font-size:10px;color:var(--gray)">التحقق</div>
+                  <div style="font-size:10px;font-weight:600;color:#aaa">بانتظار التوقيع</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIGN MODAL (DocuSign style popup) -->
+        <div id="signModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem">
+          <div style="background:#fff;border-radius:16px;width:100%;max-width:500px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+
+            <!-- modal header -->
+            <div style="background:var(--green);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:14px;font-weight:800;color:#fff">إنشاء التوقيع</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:1px">اختر طريقة التوقيع</div>
+              </div>
+              <button onclick="closeSignModal()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+
+            <!-- tabs -->
+            <div style="display:flex;border-bottom:2px solid var(--border)">
+              <button id="mtab_draw" onclick="mTab('draw')" style="flex:1;padding:12px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid var(--green);color:var(--green);font-family:'Cairo',sans-serif;margin-bottom:-2px">✏️ رسم التوقيع</button>
+              <button id="mtab_type" onclick="mTab('type')" style="flex:1;padding:12px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:var(--gray);font-family:'Cairo',sans-serif;margin-bottom:-2px">⌨️ كتابة الاسم</button>
+            </div>
+
+            <!-- draw panel -->
+            <div id="mpanel_draw" style="padding:20px">
+              <div style="font-size:12px;color:var(--gray);margin-bottom:10px;font-weight:500">ارسم توقيعك بالماوس أو بإصبعك على الجوال:</div>
+              <div style="position:relative;border:2px solid var(--green);border-radius:10px;background:#fafff9;overflow:hidden">
+                <canvas id="sigCanvas" width="460" height="120" style="width:100%;height:120px;cursor:crosshair;display:block;touch-action:none"></canvas>
+                <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#bbb;pointer-events:none;white-space:nowrap">× ارسم هنا ×</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:8px">
+                <button onclick="clearCanvas()" style="font-size:12px;color:var(--gray);background:none;border:1px solid var(--border);border-radius:7px;padding:5px 12px;cursor:pointer;font-family:'Cairo',sans-serif">🗑 مسح</button>
+                <span style="font-size:11px;color:#aaa;align-self:center" id="canvas_hint">ابدأ الرسم...</span>
+              </div>
+            </div>
+
+            <!-- type panel -->
+            <div id="mpanel_type" style="display:none;padding:20px">
+              <div style="font-size:12px;color:var(--gray);margin-bottom:10px;font-weight:500">اكتب اسمك — سيظهر بخط التوقيع تلقائياً:</div>
+              <input id="esigIn" type="text" placeholder="اكتب اسمك الكامل..." oninput="previewType()"
+                style="width:100%;padding:12px 16px;border:2px solid var(--green);border-radius:10px;font-size:15px;font-family:Georgia,serif;font-style:italic;color:#1a3a2a;outline:none;background:#fafff9;font-weight:400"/>
+              <!-- live preview -->
+              <div style="border:1px solid var(--border);border-radius:8px;background:#fff;margin-top:10px;min-height:60px;display:flex;align-items:center;justify-content:center;padding:8px">
+                <div id="type_preview" style="font-family:Georgia,serif;font-size:26px;font-style:italic;color:#1a3050;letter-spacing:1px">—</div>
+              </div>
+              <div style="font-size:11px;color:#aaa;margin-top:6px;text-align:center">معاينة التوقيع</div>
+            </div>
+
+            <!-- modal footer -->
+            <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px">
+              <button onclick="closeSignModal()" style="flex:1;padding:10px;background:var(--light);border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray);font-family:'Cairo',sans-serif">إلغاء</button>
+              <button id="applyBtn" onclick="applySignature()" disabled style="flex:2;padding:10px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;opacity:.4;font-family:'Cairo',sans-serif">✅ تطبيق التوقيع</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- agree + submit -->
+        <div style="display:flex;align-items:flex-start;gap:10px;margin:14px 0;font-size:12px;background:var(--light);border-radius:9px;padding:12px 14px;border:1px solid var(--border)">
+          <input type="checkbox" id="agr" onchange="chkSig()" style="width:auto;margin-top:2px;accent-color:var(--green)"/>
+          <label for="agr" style="font-weight:500;line-height:1.8;cursor:pointer;color:var(--dark)">أقر وأؤكد بأنني اطلعت على جميع بنود هذه الاتفاقية الصحية (١٦ مادة) كاملةً، وأفهم التزاماتها، وأوافق على جميع شروطها، وأن توقيعي الإلكتروني أعلاه صادر عن إرادة حرة ويُعدّ ملزماً قانونياً وفق أنظمة المملكة العربية السعودية.</label>
+        </div>
+
+        <button class="btn btn-primary" id="signBtn" disabled onclick="doSign()" style="width:100%;padding:14px;justify-content:center;font-size:15px;border-radius:12px;gap:10px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          إرسال الاتفاقية الموقّعة
+        </button>
+
+        <!-- success -->
+        <div id="signedBox" style="display:none;margin-top:1.25rem">
+          <div style="background:var(--green);border-radius:14px;padding:2rem;text-align:center;color:#fff">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:12px"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            <div style="font-size:18px;font-weight:800;margin-bottom:6px">تم التوقيع بنجاح</div>
+            <div style="font-size:13px;opacity:.85;margin-bottom:16px">ستصلك نسخة PDF رسمية موقعة من الطرفين على بريدك الإلكتروني خلال دقائق</div>
+            <div style="font-size:11px;opacity:.7" id="signedTime"></div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:10px;display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;background:var(--green3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔐</div>
+            <div>
+              <div style="font-size:11px;color:var(--gray);font-weight:600">رقم تأكيد التوقيع</div>
+              <div style="font-size:13px;font-weight:800;color:var(--dark);font-family:monospace" id="signCode"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+var contracts=[];var cWa=true,cEm=true;var cNum=42;
+document.getElementById('clientDate').textContent=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+document.getElementById('f_date').valueAsDate=new Date();
+
+function goPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  else{var idx={send:0,list:1,client:2}[name];document.querySelectorAll('.nav-btn')[idx].classList.add('active');}
+  if(name==='list')renderList();
+}
+
+function setStep(n){
+  for(var i=1;i<=4;i++){
+    var el=document.getElementById('sc'+i);el.classList.remove('active','done');
+    if(i<n){el.classList.add('done');el.textContent='✓';}
+    else if(i===n){el.classList.add('active');el.textContent=['١','٢','٣','٤'][i-1];}
+    else el.textContent=['١','٢','٣','٤'][i-1];
+  }
+}
+
+function chk1(){var ok=V('f_company')&&V('f_rep')&&V('f_phone')&&V('f_email');document.getElementById('btn1').disabled=!ok;}
+function V(id){return document.getElementById(id).value.trim();}
+
+function toHijri(d){
+  // Approximate Hijri date
+  var jd=Math.floor((14+31*(d.getMonth()+1)/12+d.getDate()+d.getFullYear()+Math.floor(d.getFullYear()/4)-Math.floor(d.getFullYear()/100)+Math.floor(d.getFullYear()/400)-32045));
+  var l=jd-1948440+10632;var n=Math.floor((l-1)/10631);l=l-10631*n+354;
+  var j=Math.floor((10985-l)/5965);l=l-5965*j;var i=Math.floor(l/5519);
+  var k=Math.floor((i-j+1)*j*(i*2)/(2));
+  var day=l-Math.floor((220*i+486*j+1)/(2));var month=Math.floor(day/29.5)+1;var year=30*n+l;
+  return year+'هـ';
+}
+
+var currentToken='';
+
+function buildMsg(rep,company,token){
+  return 'السلام عليكم، '+rep+' 🤝\n\nتتشرف الجمعية الخيرية الصحية لرعاية المرضى (عناية) بإرسال الاتفاقية الصحية لـ '+company+'.\n\nيرجى الاطلاع على جميع بنود الاتفاقية (١٦ مادة) والتوقيع إلكترونياً عبر الرابط التالي:\nhttps://enayah.sa/sign/'+token+'\n\nالرابط صالح لمدة ٧ أيام. سيصلكم نسخة PDF موقعة فور اكتمال التوقيع. 🌿\n\nالجمعية الخيرية الصحية لرعاية المرضى (عناية)\n📞 920021228 | 🌐 enayah.sa';
+}
+
+function goS2(){
+  cNum++;
+  var num=V('f_num')||('HC-2026-'+String(cNum).padStart(4,'0'));
+  var dateEl=document.getElementById('f_date');
+  var d=dateEl.value?new Date(dateEl.value):new Date();
+  var ds=d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+  var hijri=toHijri(d);
+
+  currentToken=Math.random().toString(36).substr(2,7).toUpperCase();
+
+  document.getElementById('cv_num_disp').textContent=num;
+  setF('cv_date',ds);setF('cv_hijri',hijri);
+  setF('cv_company',V('f_company'));setF('cv_company_h',V('f_company'));setF('cv_company_p',V('f_company'));
+  setF('cv_lic',V('f_lic')||'—');setF('cv_addr',V('f_addr')||'—');
+  setF('cv_tel',V('f_tel')||'—');setF('cv_po',V('f_po')||'—');
+  setF('cv_rep',V('f_rep'));setF('cv_jobtitle',V('f_jobtitle')||'—');
+  setF('cv_phone',V('f_phone'));setF('cv_email',V('f_email'));
+  setF('ct_rep',V('f_rep'));setF('ct_phone',V('f_phone'));setF('ct_email',V('f_email'));
+  document.getElementById('cv_company2').textContent=V('f_company');
+  document.getElementById('cv_rep2').textContent=V('f_rep')+(V('f_jobtitle')?' — '+V('f_jobtitle'):'');
+
+  show('s2');hide('s1');setStep(2);
+  document.getElementById('s2').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function goS1(){show('s1');hide('s2');setStep(1);}
+
+function goS3(){
+  var phone=V('f_phone').replace(/\D/g,'');
+  if(phone.startsWith('0'))phone='966'+phone.substring(1);
+
+  var msg=buildMsg(V('f_rep'),V('f_company'),currentToken);
+
+  // fill step 3 UI
+  document.getElementById('wa_phone_disp').textContent=V('f_phone');
+  document.getElementById('em_addr_disp').textContent=V('f_email');
+  document.getElementById('wa_msg_preview').textContent=msg;
+
+  // store for openWA/openEmail
+  window._waPhone=phone;
+  window._waMsg=msg;
+  window._emEmail=V('f_email');
+  window._emCompany=V('f_company');
+  window._emToken=currentToken;
+
+  show('s3');hide('s2');setStep(3);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goS2b(){show('s2');hide('s3');setStep(2);}
+
+function openWA(){
+  var url='https://wa.me/'+window._waPhone+'?text='+encodeURIComponent(window._waMsg);
+  window.open(url,'_blank');
+}
+
+function openEmail(){
+  var subject=encodeURIComponent('اتفاقية صحية — الجمعية الخيرية الصحية (عناية)');
+  var body=encodeURIComponent(window._waMsg);
+  window.open('mailto:'+window._emEmail+'?subject='+subject+'&body='+body,'_blank');
+}
+
+function copyMsg(){
+  if(navigator.clipboard)navigator.clipboard.writeText(window._waMsg);
+  var btn=document.getElementById('copyMsgBtn');
+  btn.textContent='✅ تم النسخ';
+  setTimeout(function(){btn.textContent='📋 نسخ الرسالة';},2000);
+}
+
+function goS4(){
+  show('s4');hide('s3');setStep(4);
+  window.scrollTo({top:0,behavior:'smooth'});
+  runSave();
+}
+
+function runSave(){
+  document.getElementById('s4_title').textContent='💾 جاري الحفظ في السجل...';
+  var steps=[
+    {id:'pr1',delay:600,icon:'✅',txt:'تم توليد رقم الاتفاقية ورابط التوقيع المشفر'},
+    {id:'pr2',delay:1200,icon:'✅',txt:'تم تسجيل إرسال الواتساب في السجل'},
+    {id:'pr3',delay:1800,icon:'✅',txt:'تم حفظ الاتفاقية في السجل الداخلي'},
+    {id:'pr4',delay:2400,icon:'✅',txt:'تم تفعيل متابعة حالة التوقيع'},
+  ];
+  steps.forEach(function(s,i){
+    var prev=i===0?100:steps[i-1].delay;
+    setTimeout(function(){document.getElementById(s.id).querySelector('.prog-ico').classList.add('spinning');},prev);
+    setTimeout(function(){
+      var item=document.getElementById(s.id);var ico=item.querySelector('.prog-ico');var txt=item.querySelector('.prog-txt');
+      ico.classList.remove('spinning');ico.textContent=s.icon;txt.textContent=s.txt;item.classList.add('done');
+    },s.delay);
+  });
+  setTimeout(function(){
+    var company=V('f_company'),rep=V('f_rep'),phone=V('f_phone'),email=V('f_email');
+    var num='HC-2026-'+String(cNum).padStart(4,'0');var now=new Date();
+    contracts.push({num:num,company:company,rep:rep,jobtitle:V('f_jobtitle')||'—',
+      phone:phone,email:email,addr:V('f_addr')||'—',lic:V('f_lic')||'—',
+      tel:V('f_tel')||'—',po:V('f_po')||'—',
+      channels:'wa em',status:'sent',
+      date:now.toLocaleDateString('ar-SA'),time:now.toLocaleTimeString('ar-SA'),
+      token:currentToken,link:'https://enayah.sa/sign/'+currentToken});
+    document.getElementById('nb').textContent=contracts.length;
+    document.getElementById('s4_title').textContent='✅ تم الحفظ بنجاح';
+    document.getElementById('s_detail').innerHTML='رقم الاتفاقية: <strong>'+num+'</strong> &nbsp;·&nbsp; '+phone+' &nbsp;·&nbsp; '+email;
+    document.getElementById('s_link').innerHTML='🔗 رابط التوقيع: <span dir="ltr">https://enayah.sa/sign/'+currentToken+'</span>';
+    document.getElementById('successBlock').classList.add('show');
+    document.getElementById('afterActions').style.display='flex';
+  },2800);
+}
+
+function freshForm(){
+  ['f_company','f_rep','f_phone','f_email','f_lic','f_addr','f_jobtitle','f_po','f_tel','f_num'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('btn1').disabled=true;
+  document.getElementById('successBlock').classList.remove('show');
+  document.getElementById('afterActions').style.display='none';
+  var icons=['📄','💬','🔒','🔔'];
+  var txts=['توليد رقم الاتفاقية ورابط التوقيع المشفر','تسجيل إرسال الواتساب','حفظ الاتفاقية في السجل الداخلي','تفعيل متابعة حالة التوقيع'];
+  ['pr1','pr2','pr3','pr4'].forEach(function(id,i){var item=document.getElementById(id);item.classList.remove('done');item.querySelector('.prog-ico').classList.remove('spinning');item.querySelector('.prog-ico').textContent=icons[i];item.querySelector('.prog-txt').textContent=txts[i];});
+  currentToken='';window._waPhone='';window._waMsg='';
+  show('s1');hide('s2');hide('s3');hide('s4');setStep(1);goPage('send',null);
+}
+
+function togCh(ch){
+  if(ch==='wa'){cWa=!cWa;document.getElementById('ch_wa').classList.toggle('on-wa',cWa);}
+  else{cEm=!cEm;document.getElementById('ch_em').classList.toggle('on-em',cEm);}
+}
+
+function renderList(){
+  var el=document.getElementById('listBody'),sub=document.getElementById('listSub');
+  var signed=contracts.filter(c=>c.status==='signed').length;
+  var sent=contracts.filter(c=>c.status==='sent').length;
+  document.getElementById('stat_total').textContent=contracts.length;
+  document.getElementById('stat_sent').textContent=sent;
+  document.getElementById('stat_signed').textContent=signed;
+  if(!contracts.length){el.innerHTML='<div style="text-align:center;padding:2.5rem;color:#aaa;font-size:13px;font-weight:500">لا توجد اتفاقيات بعد — أرسل اتفاقيتك الأولى</div>';sub.textContent='—';return;}
+  sub.textContent=contracts.length+' اتفاقية &nbsp;·&nbsp; '+signed+' موقعة';
+  el.innerHTML='<div class="clist">'+contracts.map(function(c,i){
+    var badge=c.status==='signed'?'<span class="badge b-signed">موقعة ✓</span>':'<span class="badge b-sent">بانتظار التوقيع</span>';
+    return '<div class="crow" onclick="openDetail('+i+')"><div class="crow-av">'+c.company.charAt(0)+'</div><div class="crow-info"><div class="crow-name">'+c.company+'</div><div class="crow-meta">'+c.num+' &nbsp;·&nbsp; '+c.rep+' &nbsp;·&nbsp; '+c.date+'</div></div>'+badge+'</div>';
+  }).join('')+'</div>';
+}
+
+function openDetail(i){
+  var c=contracts[i];
+  document.getElementById('listMain').style.display='none';
+  var dv=document.getElementById('detailMain');dv.classList.add('open');
+  var signRow=c.status==='signed'?'<tr><td>وقت التوقيع</td><td style="color:var(--green)">'+c.signedAt+'</td></tr><tr><td>كود التأكيد</td><td><code style="font-size:11px;background:#f5f5f5;padding:2px 6px;border-radius:4px">'+c.signCode+'</code></td></tr>':'';
+  dv.querySelector('#detailBody').innerHTML=
+    '<div class="card"><div class="card-title">📋 '+c.num+' — '+c.company+'</div>'+
+    '<table class="info-tbl">'+
+    '<tr><td>المنشأة</td><td>'+c.company+'</td></tr>'+
+    '<tr><td>ممثل التوقيع</td><td>'+c.rep+'</td></tr>'+
+    '<tr><td>المسمى</td><td>'+c.jobtitle+'</td></tr>'+
+    '<tr><td>الجوال</td><td dir="ltr" style="text-align:right">'+c.phone+'</td></tr>'+
+    '<tr><td>الإيميل</td><td dir="ltr" style="text-align:right">'+c.email+'</td></tr>'+
+    '<tr><td>العنوان</td><td>'+c.addr+'</td></tr>'+
+    '<tr><td>تاريخ الإرسال</td><td>'+c.date+' — '+c.time+'</td></tr>'+
+    signRow+'</table></div>'+
+    '<div class="card"><div class="card-title">📅 سجل الأحداث</div><div class="tl">'+
+    '<div class="tl-row"><div class="tl-dot dot-b"></div><div class="tl-txt">تم إنشاء الاتفاقية وإرسالها</div><div class="tl-time">'+c.date+' '+c.time+'</div></div>'+
+    (c.channels.includes('wa')?'<div class="tl-row"><div class="tl-dot dot-b"></div><div class="tl-txt">تم إرسال رسالة واتساب بيزنس للطرف الثاني</div><div class="tl-time">'+c.date+'</div></div>':'')+
+    (c.channels.includes('em')?'<div class="tl-row"><div class="tl-dot dot-b"></div><div class="tl-txt">تم إرسال البريد الإلكتروني مع نسخة الاتفاقية</div><div class="tl-time">'+c.date+'</div></div>':'')+
+    (c.status==='signed'
+      ?'<div class="tl-row"><div class="tl-dot dot-g"></div><div class="tl-txt" style="color:var(--green);font-weight:700">✅ وقّع الطرف الثاني على الاتفاقية — اكتملت الاتفاقية</div><div class="tl-time">'+c.signedAt+'</div></div>'
+      :'<div class="tl-row"><div class="tl-dot dot-a"></div><div class="tl-txt">⏳ في انتظار توقيع الطرف الثاني</div><div class="tl-time">—</div></div>')+
+    '</div></div>'+
+    '<div class="card"><div class="card-title">🔗 رابط التوقيع</div>'+
+    '<div style="background:var(--light);border-radius:8px;padding:10px 14px;font-size:12px;color:#555;direction:ltr;margin-bottom:12px;border:1px solid var(--border)">'+c.link+'</div>'+
+    (c.status!=='signed'
+      ?'<div class="actions"><button class="btn btn-sm btn-primary" onclick="simSign('+i+')">🔵 محاكاة توقيع الطرف الثاني ↗</button></div>'
+      :'<div style="background:var(--green3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--green);font-weight:600;border:1px solid var(--green4)">✅ تم التوقيع — الاتفاقية مكتملة ومحفوظة</div>')+
+    '</div>';
+}
+
+function simSign(i){
+  contracts[i].status='signed';contracts[i].signedAt=new Date().toLocaleString('ar-SA');
+  contracts[i].signCode='SIG-'+Math.random().toString(36).substr(2,8).toUpperCase();
+  openDetail(i);
+  var t=document.createElement('div');t.className='toast';
+  t.innerHTML='🔔 إشعار داخلي: وقّع الطرف الثاني على <strong>'+contracts[i].num+'</strong> — '+contracts[i].company;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .5s';setTimeout(()=>t.remove(),500);},4500);
+}
+
+function closeDetail(){
+  document.getElementById('listMain').style.display='block';
+  document.getElementById('detailMain').classList.remove('open');
+  renderList();
+}
+
+// ===== SIGNATURE SYSTEM =====
+var sigMode='draw';var canvasSigned=false;var sigApplied=false;
+var isDrawing=false;var lastX=0,lastY=0;
+
+// Set secretary sign date
+document.getElementById('sec_sign_date').textContent=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+
+function initCanvas(){
+  var canvas=document.getElementById('sigCanvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  ctx.strokeStyle='#1a3050';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+
+  function pos(e){
+    var r=canvas.getBoundingClientRect();
+    var sx=canvas.width/r.width,sy=canvas.height/r.height;
+    if(e.touches)return{x:(e.touches[0].clientX-r.left)*sx,y:(e.touches[0].clientY-r.top)*sy};
+    return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
+  }
+  canvas.addEventListener('mousedown',function(e){isDrawing=true;var p=pos(e);lastX=p.x;lastY=p.y;});
+  canvas.addEventListener('mousemove',function(e){
+    if(!isDrawing)return;
+    var p=pos(e);ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    lastX=p.x;lastY=p.y;canvasSigned=true;
+    document.getElementById('canvas_hint').textContent='✅ التوقيع جاهز';
+    document.getElementById('canvas_hint').style.color='var(--green)';
+    document.getElementById('applyBtn').disabled=false;
+    document.getElementById('applyBtn').style.opacity='1';
+  });
+  canvas.addEventListener('mouseup',function(){isDrawing=false;});
+  canvas.addEventListener('mouseleave',function(){isDrawing=false;});
+  canvas.addEventListener('touchstart',function(e){e.preventDefault();isDrawing=true;var p=pos(e);lastX=p.x;lastY=p.y;},{passive:false});
+  canvas.addEventListener('touchmove',function(e){
+    e.preventDefault();if(!isDrawing)return;
+    var p=pos(e);ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    lastX=p.x;lastY=p.y;canvasSigned=true;
+    document.getElementById('applyBtn').disabled=false;
+    document.getElementById('applyBtn').style.opacity='1';
+  },{passive:false});
+  canvas.addEventListener('touchend',function(){isDrawing=false;});
+}
+
+function clearCanvas(){
+  var canvas=document.getElementById('sigCanvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  canvasSigned=false;
+  document.getElementById('canvas_hint').textContent='ابدأ الرسم...';
+  document.getElementById('canvas_hint').style.color='#bbb';
+  if(sigMode==='draw'){document.getElementById('applyBtn').disabled=true;document.getElementById('applyBtn').style.opacity='.4';}
+}
+
+function mTab(mode){
+  sigMode=mode;
+  var isDraw=mode==='draw';
+  document.getElementById('mpanel_draw').style.display=isDraw?'block':'none';
+  document.getElementById('mpanel_type').style.display=isDraw?'none':'block';
+  document.getElementById('mtab_draw').style.borderBottomColor=isDraw?'var(--green)':'transparent';
+  document.getElementById('mtab_draw').style.color=isDraw?'var(--green)':'var(--gray)';
+  document.getElementById('mtab_type').style.borderBottomColor=isDraw?'transparent':'var(--green)';
+  document.getElementById('mtab_type').style.color=isDraw?'var(--gray)':'var(--green)';
+  if(!isDraw){
+    var v=document.getElementById('esigIn').value.trim();
+    document.getElementById('applyBtn').disabled=v.length<2;
+    document.getElementById('applyBtn').style.opacity=v.length<2?'.4':'1';
+  } else {
+    document.getElementById('applyBtn').disabled=!canvasSigned;
+    document.getElementById('applyBtn').style.opacity=canvasSigned?'1':'.4';
+  }
+}
+
+function previewType(){
+  var v=document.getElementById('esigIn').value;
+  document.getElementById('type_preview').textContent=v||'—';
+  var ok=v.trim().length>=2;
+  document.getElementById('applyBtn').disabled=!ok;
+  document.getElementById('applyBtn').style.opacity=ok?'1':'.4';
+}
+
+function openSignModal(){
+  if(sigApplied)return;
+  document.getElementById('signModal').style.display='flex';
+  document.body.style.overflow='hidden';
+  setTimeout(initCanvas,50);
+}
+
+function closeSignModal(){
+  document.getElementById('signModal').style.display='none';
+  document.body.style.overflow='';
+}
+
+function applySignature(){
+  sigApplied=true;
+  // copy drawing to preview or render typed name
+  var preview=document.getElementById('sig2_preview');
+  var pCtx=preview.getContext('2d');
+  if(sigMode==='draw'){
+    var src=document.getElementById('sigCanvas');
+    pCtx.drawImage(src,0,0,src.width,src.height,0,0,preview.width,preview.height);
+  } else {
+    var name=document.getElementById('esigIn').value.trim();
+    pCtx.clearRect(0,0,preview.width,preview.height);
+    pCtx.font='italic 28px Georgia,serif';
+    pCtx.fillStyle='#1a3050';
+    pCtx.textAlign='center';
+    pCtx.fillText(name,preview.width/2,40);
+    // underline
+    pCtx.beginPath();pCtx.moveTo(20,50);pCtx.lineTo(180,50);
+    pCtx.strokeStyle='#1a3050';pCtx.lineWidth=1;pCtx.globalAlpha=.35;pCtx.stroke();pCtx.globalAlpha=1;
+  }
+
+  // update signer 2 card
+  document.getElementById('sig2_placeholder').style.display='none';
+  var res=document.getElementById('sig2_result');
+  res.style.display='flex';
+  document.getElementById('cli_sign_date').textContent=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('cli_sign_date').style.color='var(--dark)';
+  document.getElementById('cli_verify_status').innerHTML='<div style="font-size:10px;color:var(--gray)">التحقق</div><div style="font-size:10px;font-weight:600;color:#059669">✓ موثّق</div>';
+  // update card border to green
+  document.getElementById('signer2_card').style.borderColor='#d1fae5';
+  document.getElementById('signer2_card').style.background='#f9fefb';
+  document.getElementById('signer2_card').querySelector('div').style.background='#d1fae5';
+
+  closeSignModal();
+  chkSig();
+}
+
+function chkSig(){
+  var agree=document.getElementById('agr')&&document.getElementById('agr').checked;
+  var btn=document.getElementById('signBtn');
+  if(btn){btn.disabled=!(agree&&sigApplied);btn.style.opacity=(agree&&sigApplied)?'1':'.5';}
+}
+
+function doSign(){
+  document.getElementById('signBtn').disabled=true;
+  document.getElementById('signBtn').innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg> جاري الإرسال...';
+  setTimeout(function(){
+    var t=new Date().toLocaleString('ar-SA');
+    var code='SIG-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();
+    document.getElementById('signedTime').textContent='وقت التوقيع: '+t;
+    document.getElementById('signCode').textContent=code;
+    document.getElementById('signedBox').style.display='block';
+    document.getElementById('signBtn').style.display='none';
+    document.getElementById('signedBox').scrollIntoView({behavior:'smooth',block:'center'});
+  },1400);
+}
+
+setTimeout(function(){document.getElementById('signModal').style.display='none';},0);
+
+function setF(id,val){
+  var el=document.getElementById(id);if(!el)return;
+  el.textContent=val;
+  if(el.classList.contains('fv'))el.classList.toggle('mt',!val||val==='—');
+}
+function show(id){document.getElementById(id).style.display='block';}
+function hide(id){document.getElementById(id).style.display='none';}
+</script>
+</body>
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اتفاقية صحية — عناية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="config.js"></script>
+<style>
+:root{--green:#1e6b45;--green2:#27875a;--green3:#e8f5ee;--green4:#c8e6d5;--dark:#1a1a1a;--gray:#6b7280;--light:#f8f9fa;--border:#e5e7eb;--white:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;direction:rtl;background:#f4f6f4;color:var(--dark);font-size:14px}
+.wrap{max-width:780px;margin:0 auto;padding:1rem}
+
+/* top status bar */
+.status-bar{background:var(--green);color:#fff;padding:10px 20px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;border-radius:10px;margin-bottom:1rem}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#a7f3d0;animation:blink 1.5s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* contract doc */
+.doc{background:#fff;border:1px solid #d0d0c8;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:1rem}
+.doc-head{background:linear-gradient(135deg,#1e6b45,#27875a);padding:20px 28px}
+.doc-head h2{color:#fff;font-size:17px;font-weight:800}
+.doc-head p{color:rgba(255,255,255,.8);font-size:11px;margin-top:3px}
+.doc-head-row{display:flex;align-items:center;justify-content:space-between}
+.doc-num{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 14px;text-align:center;font-size:13px;color:#fff;font-weight:800}
+.doc-num small{display:block;font-size:10px;opacity:.7;font-weight:400;margin-bottom:2px}
+.doc-strip{height:4px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.4),rgba(255,255,255,.1))}
+
+.doc-body{padding:2rem 2.5rem;font-size:13px;line-height:2;color:#1a1a1a}
+.doc-body h3{text-align:center;font-size:18px;font-weight:800;color:var(--green);margin-bottom:.25rem}
+.bismillah{text-align:center;font-size:13px;color:var(--gray);font-style:italic;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+
+.intro-box{background:var(--green3);border-right:4px solid var(--green);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;line-height:1.9}
+
+.art{margin-bottom:1.25rem}
+.art-head{display:flex;align-items:center;gap:8px;margin-bottom:.4rem}
+.art-n{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.art-t{font-size:13px;font-weight:800;color:var(--green)}
+.art-body{padding-right:34px;font-size:13px;line-height:2;color:#2a2a2a}
+.art-body ul{margin-right:1.5rem;margin-top:.4rem}
+.art-body li{margin-bottom:.35rem}
+.sub{font-weight:700;color:var(--dark);margin-top:.75rem;margin-bottom:.2rem}
+
+/* filled values */
+.fv{background:#e8f5ee;border-bottom:2px solid var(--green);padding:0 5px 1px;color:#1a5c35;font-weight:700;border-radius:2px}
+
+/* contact table */
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:.5rem}
+.ctbl th{background:var(--green);color:#fff;padding:7px 10px;text-align:center;font-weight:700}
+.ctbl td{padding:6px 10px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+.ctbl tr:nth-child(even) td{background:#f8faf9}
+.ptd{background:var(--green3);font-weight:700;color:var(--green)}
+
+/* signature section */
+.sig-section{margin:2rem 0 1rem;border-top:2px solid var(--border);padding-top:1.5rem}
+.sig-header{background:#f7f8fa;border:1px solid #dde1e7;border-radius:10px;padding:14px 18px;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px}
+.sig-icon{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sig-pending{margin-right:auto;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #dde1e7;border-radius:100px;padding:4px 12px;font-size:11px;color:var(--gray)}
+.sig-pending span{width:6px;height:6px;border-radius:50%;background:#f9a825;display:inline-block}
+
+.parties{display:grid;grid-template-columns:1fr 1px 1fr;gap:0;margin-bottom:1.25rem}
+.party{padding:0 1.5rem;text-align:center}
+.pdiv{background:var(--border)}
+.prole{font-size:11px;font-weight:700;color:var(--gray);margin-bottom:4px}
+.porg{font-size:13px;font-weight:800;color:var(--green)}
+.prep{font-size:12px;color:var(--gray);margin-bottom:8px}
+.pbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700}
+.done-badge{background:#EAF3DE;color:#059669;border:1px solid #6ee7b7}
+.wait-badge{background:#fff8e1;color:#b45309;border:1px solid #fcd34d}
+
+/* party 1 sig box */
+.p1-sig{border:1px solid var(--green4);border-radius:8px;background:#fafff9;padding:8px;margin:8px 0;min-height:68px;display:flex;align-items:center;justify-content:center}
+
+/* party 2 sig area */
+.p2-placeholder{border:2px dashed #fbbf24;border-radius:8px;min-height:68px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#fff;margin:8px 0;transition:all .2s}
+.p2-placeholder:hover{background:#fffbeb;border-color:#f59e0b}
+.p2-result{display:none;border:1px solid var(--green4);border-radius:8px;background:#fafff9;padding:8px;min-height:68px;align-items:center;justify-content:center;margin:8px 0}
+
+.pdate{font-size:10px;color:var(--gray);margin-top:4px}
+.pverify{font-size:10px;font-weight:600}
+
+/* modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.modal-head{background:var(--green);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{color:#fff;font-size:14px;font-weight:800}
+.modal-head p{color:rgba(255,255,255,.8);font-size:11px;margin-top:1px}
+.close-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-tabs{display:flex;border-bottom:2px solid var(--border)}
+.mtab{flex:1;padding:12px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
+.mtab.active{border-bottom-color:var(--green);color:var(--green)}
+.mtab.inactive{color:var(--gray)}
+.modal-body{padding:20px}
+.canvas-wrap{position:relative;border:2px solid var(--green);border-radius:10px;background:#fafff9;overflow:hidden}
+#sigCanvas{width:100%;height:130px;cursor:crosshair;display:block;touch-action:none}
+.canvas-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#ccc;pointer-events:none;white-space:nowrap}
+.clear-btn{font-size:12px;color:var(--gray);background:none;border:1px solid var(--border);border-radius:7px;padding:5px 12px;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px}
+.type-input{width:100%;padding:12px 16px;border:2px solid var(--green);border-radius:10px;font-size:16px;font-family:Georgia,serif;font-style:italic;color:#1a3a2a;outline:none;background:#fafff9}
+.type-preview-box{border:1px solid var(--border);border-radius:8px;background:#fff;margin-top:10px;min-height:56px;display:flex;align-items:center;justify-content:center;padding:8px}
+#typePreview{font-family:Georgia,serif;font-size:24px;font-style:italic;color:#1a3050;letter-spacing:1px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px}
+.cancel-btn{flex:1;padding:10px;background:var(--light);border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray);font-family:'Cairo',sans-serif}
+.apply-btn{flex:2;padding:10px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;transition:opacity .2s}
+.apply-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* agree + submit */
+.agree-row{display:flex;align-items:flex-start;gap:10px;background:var(--light);border-radius:9px;padding:12px 14px;border:1px solid var(--border);margin:14px 0;font-size:12px}
+.submit-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* success */
+.success-box{display:none;margin-top:1.25rem}
+.success-green{background:var(--green);border-radius:14px;padding:2rem;text-align:center;color:#fff}
+.success-code{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:10px;display:flex;align-items:center;gap:12px}
+.code-icon{width:36px;height:36px;background:var(--green3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* expired */
+.expired-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:3rem;text-align:center;margin:2rem 0}
+
+@media(max-width:600px){
+  .parties{grid-template-columns:1fr}.pdiv{display:none}
+  .party{padding:0;margin-bottom:1rem}
+  .doc-body{padding:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- TOPBAR with real logo -->
+<div style="background:var(--g);padding:10px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.2)">
+  <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+       alt="عناية" style="height:44px;width:auto;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0"
+       onerror="this.style.display='none'"/>
+  <div style="width:1px;height:32px;background:rgba(255,255,255,.25);flex-shrink:0"></div>
+  <div>
+    <div style="color:#fff;font-size:14px;font-weight:800">الجمعية الخيرية الصحية لرعاية المرضى (عناية)</div>
+    <div style="color:rgba(255,255,255,.75);font-size:11px;margin-top:1px">اتفاقية إلكترونية رسمية — علاج ووقاية</div>
+  </div>
+  <div style="margin-right:auto;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:5px 12px;border-radius:100px;font-size:11px;color:#fff;font-weight:600">
+    <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:blink 1.5s infinite"></span>
+    <span id="expiry_txt">جاري التحقق...</span>
+  </div>
+</div>
+
+  <!-- expired state (hidden by default) -->
+  <div class="expired-box" id="expiredBox" style="display:none">
+    <div style="font-size:48px;margin-bottom:1rem">⏳</div>
+    <div style="font-size:18px;font-weight:800;color:#e24b4a;margin-bottom:.5rem">انتهت صلاحية الرابط</div>
+    <div style="font-size:13px;color:var(--gray)">يرجى التواصل مع الجمعية للحصول على رابط جديد</div>
+    <div style="margin-top:1rem;font-size:13px;color:var(--gray)">📞 920021228</div>
+  </div>
+
+  <div class="expired-box" id="loadError" style="display:none">
+    <div style="font-size:48px;margin-bottom:1rem">⚠️</div>
+    <div style="font-size:18px;font-weight:800;color:#e24b4a;margin-bottom:.5rem">تعذّر تحميل بيانات العقد</div>
+    <div style="font-size:13px;color:var(--gray);line-height:1.9">الرابط لا يحمل بيانات العقد، أو لم يتم العثور على العقد في قاعدة البيانات.<br>إن كنت مسؤول النظام: تأكد أن ملف config.js معبّأ بمفاتيح Supabase الصحيحة.</div>
+    <div style="margin-top:1rem;font-size:13px;color:var(--gray)">📞 920021228</div>
+  </div>
+
+  <!-- contract -->
+  <div class="doc" id="contractDoc">
+    <div class="doc-head">
+      <div class="doc-head-row">
+        <div style="display:flex;align-items:center;gap:14px">
+          <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+               alt="عناية" style="height:56px;width:auto;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0"
+               onerror="this.style.display='none'"/>
+          <div>
+            <h2>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</h2>
+            <p>اتفاقية صحية إلكترونية رسمية — آمنة ومشفرة 🔒</p>
+          </div>
+        </div>
+        <div class="doc-num">
+          <small>رقم الاتفاقية</small>
+          <span id="p_num">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="doc-strip"></div>
+
+    <div class="doc-body">
+      <div id="bodyHealth">
+      <h3>اتفاقية صحية</h3>
+      <div class="bismillah">بعون الله تعالى &nbsp;|&nbsp; <span id="p_date"></span></div>
+
+      <div class="intro-box">
+        وفي يوم <span class="fv" id="p_date2">—</span> بمدينة الرياض، تم إبرام هذه الاتفاقية الصحية بين الجمعية الخيرية الصحية لرعاية المرضى (عناية) بوصفها الطرف الأول، ومنشأة <span class="fv" id="p_company_h">—</span> بوصفها الطرف الثاني.
+      </div>
+
+      <!-- Party 1 -->
+      <div class="art">
+        <div class="art-head"><div class="art-n">١</div><div class="art-t">الطرف الأول (الجمعية):</div></div>
+        <div class="art-body">
+          الجمعية الخيرية الصحية لرعاية المرضى (<strong>عناية</strong>) — المسجلة بالمركز الوطني لتنمية القطاع غير الربحي، برقم ترخيص <strong>(٣٦٤)</strong>، عنوانها حي الربوة، مدينة الرياض، هاتف <strong>٩٢٠٠٢١٢٢٨</strong>، ص.ب <strong>١١٥٨٨</strong> الرياض <strong>٧٥٨٩٥</strong>. ويمثلها <strong>الدكتور / سلمان بن عبد الله المطيري</strong> (الأمين العام)، بريد: info@enayah.org.sa — ويشار إليها بـ (<strong>الجمعية</strong>) أو (<strong>الطرف الأول</strong>).
+        </div>
+      </div>
+
+      <!-- Party 2 -->
+      <div class="art">
+        <div class="art-head"><div class="art-n" style="background:#555">٢</div><div class="art-t" style="color:#555">الطرف الثاني (المنشأة الصحية):</div></div>
+        <div class="art-body">
+          شركة / <span class="fv" id="p_company">—</span> &nbsp;·&nbsp;
+          ترخيص رقم: <span class="fv" id="p_lic">—</span> &nbsp;·&nbsp;
+          عنوانها مدينة الرياض <span class="fv" id="p_addr">—</span><br>
+          هاتف: <span class="fv" id="p_tel">—</span> &nbsp;·&nbsp; ص.ب: <span class="fv" id="p_po">—</span><br>
+          ويمثلها في التوقيع: <strong><span class="fv" id="p_rep">—</span></strong> (<span class="fv" id="p_jobtitle">—</span>)<br>
+          جوال: <span class="fv" id="p_phone">—</span> &nbsp;·&nbsp; بريد: <span class="fv" id="p_email" dir="ltr">—</span><br>
+          — ويشار إليها بـ (<strong>الشريك</strong>) أو (<strong>الطرف الثاني</strong>).
+        </div>
+      </div>
+
+      <!-- Preamble -->
+      <div class="art">
+        <div class="art-head"><div class="art-n">تم</div><div class="art-t">تمهيد:</div></div>
+        <div class="art-body">حيث إن الطرف الأول جمعية عناية الصحية جمعية أهلية مرخصة، تعنى بتقديم الخدمات العلاجية للمستفيدين المستحقين. وحيث إن الطرف الثاني (<span class="fv" id="p_company2">—</span>) منشأة صحية مرخصة من الجهات الحكومية المختصة، وتتوفر لديه الإمكانات الطبية والتأهيلية اللازمة لتقديم الخدمات الصحية للمستفيدين، فقد اتفق الطرفان وهما بكامل أهليتهما الشرعية والنظامية على ما يلي:</div>
+      </div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١</div><div class="art-t">المادة (١): التمهيد</div></div><div class="art-body">يعد التمهيد أعلاه جزءاً لا يتجزأ من الاتفاقية ومكملاً ومتمماً لمواده.</div></div>
+
+      <div class="art">
+        <div class="art-head"><div class="art-n">٢</div><div class="art-t">المادة (٢): موضوع الاتفاقية</div></div>
+        <div class="art-body">
+          تهدف هذه الاتفاقية إلى تنظيم أوجه التعاون بين الطرفين في تقديم الخدمات الصحية وتعزيز المسؤولية المجتمعية من خلال:
+          <div class="sub">أولاً: الشراكة في مجال العلاج</div>
+          <ul><li>التعاون في تقديم الخدمات الطبية التخصصية للمستفيدين المعتمدين عبر المنصة الإلكترونية المعتمدة.</li><li>يحق للطرف الثاني الاعتذار عن استقبال حالات تتطلب خدمات غير متوفرة لديه مع إشعار الطرف الأول.</li></ul>
+          <div class="sub">ثانياً: الشراكة في مجال التسويق والإعلام</div>
+          <ul><li>التعاون في نشر المواد التعريفية والتوعوية داخل منشآت الطرف الثاني وفق الضوابط المعتمدة.</li><li>توثيق قصص النجاح والحالات المستفيدة بعد الحصول على الموافقات النظامية اللازمة.</li></ul>
+          <div class="sub">ثالثاً: الشراكة في الأنشطة التطوعية</div>
+          <ul><li>التعاون في تنفيذ المبادرات والبرامج الصحية المشتركة التي تسهم في خدمة المجتمع.</li></ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-head"><div class="art-n">٣</div><div class="art-t">المادة (٣): التزامات الطرف الأول</div></div>
+        <div class="art-body"><ul>
+          <li>إحالة الحالات المستحقة وتزويد الطرف الثاني بالبيانات والمستندات اللازمة.</li>
+          <li>الالتزام بسداد تكاليف الخدمات العلاجية المعتمدة وفقاً لأحكام المادتين الثامنة والتاسعة.</li>
+          <li>متابعة الحالات المحالة والتنسيق مع الطرف الثاني لضمان تنفيذ الخطة العلاجية.</li>
+          <li>إنشاء حساب للطرف الثاني على النظام التقني المعتمد وتزويده ببيانات الدخول.</li>
+        </ul></div>
+      </div>
+
+      <div class="art">
+        <div class="art-head"><div class="art-n">٤</div><div class="art-t">المادة (٤): التزامات الطرف الثاني</div></div>
+        <div class="art-body"><ul>
+          <li>تزويد الطرف الأول بقائمة الخدمات الطبية وأسعارها وفق نموذج عرض الأسعار المعتمد.</li>
+          <li>تقديم الخدمات العلاجية للمستفيدين المعتمدين وفقاً للأنظمة الصحية المعمول بها في المملكة.</li>
+          <li>استقبال المستفيدين الصادر لهم تعميد من الطرف الأول والالتزام بالتكلفة المالية المعتمدة.</li>
+          <li>المساهمة في دعم استدامة المشاريع الصحية بنسبة (٥٪) من صافي قيمة الحوالات الشهرية.</li>
+        </ul></div>
+      </div>
+
+      <div class="art"><div class="art-head"><div class="art-n">٥</div><div class="art-t">المادة (٥): التقييم والمعايير</div></div><div class="art-body">يخضع الطرف الثاني لتقييم دوري من قبل الطرف الأول لقياس مستوى الالتزام وجودة الأداء وكفاءة الإجراءات المالية والالتزام بالمدد الزمنية.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">٦</div><div class="art-t">المادة (٦): مدة الاتفاقية</div></div><div class="art-body">تكون مدة هذه الاتفاقية سنة واحدة ميلادية تبدأ من تاريخ توقيعها، وتتجدد تلقائياً لمدة مماثلة ما لم يُشعر أحد الطرفين الآخر كتابةً بعدم التجديد قبل (٣٠) يوماً.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">٧</div><div class="art-t">المادة (٧): إنهاء الاتفاقية</div></div><div class="art-body">يحق لأي من الطرفين إنهاء هذه الاتفاقية بإشعار خطي بما لا يقل عن (٣٠) يوماً، ولا يترتب على ذلك إسقاط أي حقوق مالية أو التزامات تعاقدية نشأت خلال فترة سريانها.</div></div>
+
+      <div class="art">
+        <div class="art-head"><div class="art-n">٨</div><div class="art-t">المادة (٨): المدد الزمنية ومتطلبات المطالبات المالية</div></div>
+        <div class="art-body">
+          <div class="sub">أولاً: المدد الزمنية</div>
+          <ul>
+            <li><strong>تأكيد الاستقبال:</strong> خلال (٧) سبعة أيام من تاريخ إصدار التعميد.</li>
+            <li><strong>تقديم الخدمة:</strong> خلال (٣٠) يوماً من تأكيد الاستقبال.</li>
+            <li><strong>رفع المطالبة:</strong> خلال (١٠) أيام من اكتمال الخدمة.</li>
+          </ul>
+          <div class="sub">ثانياً: المستندات المطلوبة</div>
+          <ul>
+            <li>فاتورة إلكترونية مستوفية لمتطلبات هيئة الزكاة والضريبة والجمارك تتضمن QR Code.</li>
+            <li>تقرير طبي ختامي يثبت استكمال المستفيد للخدمة العلاجية.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art"><div class="art-head"><div class="art-n">٩</div><div class="art-t">المادة (٩): أحكام المطالبات المالية</div></div><div class="art-body">يسدد الطرف الأول مستحقات الطرف الثاني خلال أربعة عشر يوماً من تاريخ تقديم المطالبة الصحيحة عن طريق التحويل البنكي للحساب المعتمد.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١٠</div><div class="art-t">المادة (١٠): القوة القاهرة</div></div><div class="art-body">يقصد بالقوة القاهرة كل حدث استثنائي خارج عن إرادة الطرفين لا يمكن توقعه أو دفعه ويستحيل معه تنفيذ الالتزامات، كالكوارث الطبيعية والأوبئة والقرارات الحكومية.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١١</div><div class="art-t">المادة (١١): الأخطاء الطبية</div></div><div class="art-body">يتحمل الطرف الثاني كامل المسؤولية المهنية والنظامية عن أي أخطاء طبية تنشأ عن تقديمه الخدمات الصحية للمستفيدين وفق الأنظمة المعمول بها في المملكة.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١٢</div><div class="art-t">المادة (١٢): الأنظمة المعمول بها</div></div><div class="art-body">تخضع هذه الاتفاقية وتفسر وفق الأنظمة واللوائح المعمول بها في المملكة العربية السعودية. وفي حال نشوء أي خلاف يلتزم الطرفان بالسعي إلى تسويته ودياً.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١٣</div><div class="art-t">المادة (١٣): أحكام عامة</div></div><div class="art-body">يلتزم الطرفان بالمحافظة على سرية المعلومات والبيانات المتبادلة بموجب هذه الاتفاقية وفق نظام حماية البيانات الشخصية في المملكة.</div></div>
+
+      <!-- Contact table -->
+      <div class="art">
+        <div class="art-head"><div class="art-n">١٤</div><div class="art-t">المادة (١٤): بيانات التواصل</div></div>
+        <div class="art-body">
+          <table class="ctbl">
+            <thead><tr><th></th><th>المسمى الوظيفي</th><th>الاسم</th><th>الجوال</th><th>البريد</th></tr></thead>
+            <tbody>
+              <tr><td class="ptd" rowspan="4">الطرف الأول</td><td>المنسق الطبي</td><td>أ. مازن غانم</td><td dir="ltr">0507158785</td><td dir="ltr">proj01@enayah.org.sa</td></tr>
+              <tr><td>إدارة الشراكات</td><td>—</td><td dir="ltr">0561994060</td><td dir="ltr">stratpart@enayah.org.sa</td></tr>
+              <tr><td>مدير الخدمات</td><td>د. طارق السلطان</td><td dir="ltr">0554477442</td><td dir="ltr">t.z.m.alsultan@enayah.org.sa</td></tr>
+              <tr><td>الأمين العام</td><td>د. سلمان المطيري</td><td dir="ltr">920021228</td><td dir="ltr">info@enayah.org.sa</td></tr>
+              <tr><td class="ptd" rowspan="3">الطرف الثاني</td><td>ممثل التوقيع</td><td id="ct_rep">—</td><td id="ct_phone">—</td><td id="ct_email" dir="ltr">—</td></tr>
+              <tr><td>المدير الطبي</td><td>—</td><td>—</td><td>—</td></tr>
+              <tr><td>المدير المالي</td><td>—</td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١٥</div><div class="art-t">المادة (١٥): لغة وعدد النسخ</div></div><div class="art-body">حررت هذه الاتفاقية باللغة العربية من نسختين أصليتين، بيد كل طرف نسخة للعمل بموجبها.</div></div>
+
+      <div class="art"><div class="art-head"><div class="art-n">١٦</div><div class="art-t">المادة (١٦): الملاحق</div></div><div class="art-body">يُعد ملحق أسعار الخدمات الصحية المتفق عليها جزءاً لا يتجزأ من هذه الاتفاقية ومكملاً ومتمماً لها.</div></div>
+      </div><!-- /bodyHealth -->
+      <div id="bodyGeneral" style="display:none"></div>
+
+      <!-- ===== SIGNATURE SECTION ===== -->
+      <div class="sig-section">
+
+        <div class="sig-header">
+          <div class="sig-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:800">التوقيع الإلكتروني الرسمي</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:1px">اتفاقية صحية — الجمعية الخيرية الصحية (عناية)</div>
+          </div>
+          <div class="sig-pending"><span></span> بانتظار توقيعك</div>
+        </div>
+
+        <div class="parties">
+          <!-- Party 1 -->
+          <div class="party">
+            <div style="background:#d1fae5;border-radius:10px 10px 0 0;padding:7px 12px;display:flex;align-items:center;gap:6px">
+              <div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">١</div>
+              <div style="font-size:11px;font-weight:700;color:#065f46">الطرف الأول</div>
+              <div style="margin-right:auto;font-size:10px;font-weight:700;color:#059669">✓ موقّع</div>
+            </div>
+            <div style="border:1.5px solid #d1fae5;border-top:none;border-radius:0 0 10px 10px;padding:12px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+                     alt="عناية" style="height:30px;width:auto;object-fit:contain;flex-shrink:0"
+                     onerror="this.style.display='none'"/>
+                <div>
+                  <div style="font-size:12px;font-weight:700">الجمعية الخيرية الصحية (عناية)</div>
+                  <div style="font-size:11px;color:var(--gray)">د. سلمان بن عبد الله المطيري — الأمين العام</div>
+                </div>
+              </div>
+              <div class="p1-sig">
+                <svg width="180" height="52" viewBox="0 0 180 52" fill="none">
+                  <path d="M10 42 C16 38 20 30 26 26 C30 23 33 27 36 24 C40 20 42 14 48 16 C52 17 50 24 54 22 C58 19 60 12 66 14 C70 15 69 22 73 20 C77 18 80 12 86 14 C90 16 89 23 93 21 C97 19 100 13 106 15 C110 17 109 24 113 22 C117 19 120 13 126 15 C130 16 129 23 133 21 C137 18 140 13 146 15 C150 17 149 24 153 22 C157 19 160 14 166 16" stroke="#1a3050" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  <path d="M8 48 C30 46 60 47 90 46 C120 45 150 47 170 46" stroke="#1a3050" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.35"/>
+                  <path d="M26 26 C24 22 20 20 22 26" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <path d="M66 14 C64 10 60 9 62 14" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <path d="M106 15 C104 11 100 10 102 15" stroke="#1a3050" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                </svg>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px">
+                <div><div class="pdate">تاريخ التوقيع</div><div style="font-size:11px;font-weight:600" id="p1_date"></div></div>
+                <div style="text-align:left"><div class="pdate">التحقق</div><div class="pverify" style="color:#059669">✓ موثّق</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pdiv"></div>
+
+          <!-- Party 2 -->
+          <div class="party" id="party2card">
+            <div style="background:#fef3c7;border-radius:10px 10px 0 0;padding:7px 12px;display:flex;align-items:center;gap:6px">
+              <div style="width:20px;height:20px;border-radius:50%;background:#f59e0b;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">٢</div>
+              <div style="font-size:11px;font-weight:700;color:#92400e">الطرف الثاني</div>
+              <div style="margin-right:auto;font-size:10px;font-weight:700;color:#b45309" id="p2_status_label">⏳ في انتظارك</div>
+            </div>
+            <div style="border:1.5px solid #fde68a;border-top:none;border-radius:0 0 10px 10px;padding:12px" id="party2inner">
+              <div style="font-size:12px;font-weight:700;margin-bottom:2px" id="p_company_card">—</div>
+              <div style="font-size:11px;color:var(--gray);margin-bottom:10px" id="p_rep_card">—</div>
+              <div class="p2-placeholder" id="p2placeholder" onclick="openModal()">
+                <div style="text-align:center">
+                  <div style="font-size:24px;margin-bottom:4px">✍️</div>
+                  <div style="font-size:12px;font-weight:700;color:#b45309">اضغط للتوقيع</div>
+                </div>
+              </div>
+              <div class="p2-result" id="p2result">
+                <canvas id="p2preview" width="200" height="52" style="max-width:100%;height:52px"></canvas>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px">
+                <div><div class="pdate">تاريخ التوقيع</div><div style="font-size:11px;font-weight:600;color:#aaa" id="p2_date_disp">—</div></div>
+                <div style="text-align:left" id="p2_verify"><div class="pdate">التحقق</div><div class="pverify" style="color:#aaa">بانتظار</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- agree -->
+        <div class="agree-row">
+          <input type="checkbox" id="agr" onchange="chkSubmit()" style="width:auto;margin-top:2px;accent-color:var(--green)"/>
+          <label for="agr" style="font-weight:500;line-height:1.8;cursor:pointer"><span id="agrText">أقر وأؤكد بأنني اطلعت على جميع بنود هذه الاتفاقية الصحية (١٦ مادة) كاملةً، وأفهم التزاماتها، وأوافق عليها، وأن توقيعي الإلكتروني ملزم قانونياً وفق أنظمة المملكة العربية السعودية.</span></label>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" disabled onclick="submitSignature()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          إرسال الاتفاقية الموقّعة
+        </button>
+
+        <!-- success -->
+        <div class="success-box" id="successBox">
+          <div class="success-green">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" style="margin-bottom:12px"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            <div style="font-size:18px;font-weight:800;margin-bottom:6px">تم التوقيع بنجاح</div>
+            <div style="font-size:13px;opacity:.85;margin-bottom:10px">ستصلك نسخة PDF رسمية موقعة من الطرفين على بريدك الإلكتروني</div>
+            <div style="font-size:11px;opacity:.7" id="signedTime"></div>
+          </div>
+          <div class="success-code">
+            <div class="code-icon">📋</div>
+            <div>
+              <div style="font-size:11px;color:var(--gray);font-weight:600">الرقم المرجعي للعقد</div>
+              <div style="font-size:13px;font-weight:800;font-family:monospace" id="signRef"></div>
+            </div>
+          </div>
+          <div class="success-code">
+            <div class="code-icon">🔐</div>
+            <div>
+              <div style="font-size:11px;color:var(--gray);font-weight:600">رقم تأكيد التوقيع</div>
+              <div style="font-size:13px;font-weight:800;font-family:monospace" id="signCode"></div>
+            </div>
+          </div>
+          <button id="dlPdfBtn" onclick="downloadClientPDF()" style="width:100%;margin-top:12px;background:var(--green);color:#fff;border:none;border-radius:10px;padding:14px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">⬇️ تحميل نسخة PDF موقّعة</button>
+          <div style="background:#EAF3DE;border-radius:10px;padding:12px 16px;margin-top:10px;font-size:13px;color:var(--green);font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px">
+            <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+                 alt="عناية" style="height:28px;width:auto;object-fit:contain" onerror="this.style.display='none'"/>
+            📞 للاستفسار: 920021228 | 📧 info@enayah.org.sa
+          </div>
+        </div>
+
+      </div><!-- /sig-section -->
+    </div><!-- /doc-body -->
+  </div><!-- /doc -->
+
+</div><!-- /wrap -->
+
+<!-- ===== SIGN MODAL ===== -->
+<div class="modal-bg" id="signModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div><h3>إنشاء التوقيع الإلكتروني</h3><p>اختر طريقة التوقيع</p></div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="mtab active" id="tab_draw" onclick="switchTab('draw')">✏️ رسم التوقيع</button>
+      <button class="mtab inactive" id="tab_type" onclick="switchTab('type')">⌨️ كتابة الاسم</button>
+    </div>
+    <div class="modal-body">
+      <div id="panel_draw">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px;font-weight:500">ارسم توقيعك بالماوس أو بإصبعك:</div>
+        <div class="canvas-wrap">
+          <canvas id="sigCanvas" width="440" height="130"></canvas>
+          <div class="canvas-hint" id="canvasHint">× ارسم هنا ×</div>
+        </div>
+        <button class="clear-btn" onclick="clearCanvas()">🗑 مسح</button>
+      </div>
+      <div id="panel_type" style="display:none">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px;font-weight:500">اكتب اسمك — سيظهر بخط التوقيع:</div>
+        <input class="type-input" id="typeInput" placeholder="اكتب اسمك الكامل..." oninput="onTypeInput()"/>
+        <div class="type-preview-box"><div id="typePreview" style="font-family:Georgia,serif;font-size:24px;font-style:italic;color:#1a3050;letter-spacing:1px">—</div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" onclick="closeModal()">إلغاء</button>
+      <button class="apply-btn" id="applyBtn" disabled onclick="applySignature()">✅ تطبيق التوقيع</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// إعدادات Supabase تُقرأ من الملف المشترك config.js
+// لتعديل المفاتيح: افتح config.js فقط (مكان واحد للملفين)
+// ═══════════════════════════════════════════════════════════
+var _CFG = window.ENAYA_CONFIG || {};
+const SUPABASE_URL = _CFG.SUPABASE_URL || "";
+const SUPABASE_KEY = _CFG.SUPABASE_KEY || "";
+
+// ===== READ URL PARAMS =====
+var params = new URLSearchParams(window.location.search);
+var P = {
+  id:       params.get('id')       || '',
+  code:     params.get('id')       || '',   // short link code
+  num:      params.get('num')      || 'HC-2026-0001',
+  type:     params.get('type')     || 'health',
+  company:  params.get('company')  || '',
+  rep:      params.get('rep')      || '',
+  jobtitle: params.get('jobtitle') || '',
+  phone:    params.get('phone')    || '',
+  email:    params.get('email')    || '',
+  lic:      params.get('lic')      || '—',
+  addr:     params.get('addr')     || '—',
+  tel:      params.get('tel')      || '—',
+  po:       params.get('po')       || '—',
+  contract_date: params.get('date')|| '',
+  notify:   params.get('notify')   || '',
+  notify_email: params.get('notify_email') || '',
+  expires:  params.get('expires')  || '',
+  status:   'sent'
+};
+
+var today = new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+var sbClient = null;
+if(typeof SUPABASE_URL === 'string' && SUPABASE_URL.indexOf('http') === 0 && SUPABASE_KEY.length > 20 && window.supabase){
+  try { sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e){ console.warn(e); }
+}
+
+// ===== BOOT: fetch full contract by short code via secure RPC, then render =====
+async function boot(){
+  if(P.code && sbClient){
+    try{
+      // وصول آمن: دالة في القاعدة تُرجع عقداً واحداً فقط بالـ code (لا وصول مباشر للجدول)
+      var res = await sbClient.rpc('get_contract_for_signing', { p_code: P.code });
+      var r = (res && res.data && res.data.length) ? res.data[0] : null;
+      if(r){
+        ['num','type','company','rep','jobtitle','phone','email','lic','addr','tel','po','contract_date'].forEach(function(k){
+          if(r[k] !== undefined && r[k] !== null && r[k] !== '') P[k] = r[k];
+        });
+        P.status = r.status || 'sent';
+        if(r.expires_at) P.expires = String(new Date(r.expires_at).getTime());
+        // سجّل فتح الرابط (sent → opened)
+        try{ await sbClient.rpc('mark_opened', { p_code: P.code }); }catch(e){}
+      }
+    }catch(e){ console.warn('fetch failed', e); }
+  }
+  renderContract();
+}
+
+function esc(s){ return (s==null?'—':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fvh(v){ return '<span class="fv">'+esc(v||'—')+'</span>'; }
+
+function renderContract(){
+  // No data reflected? (short link but Supabase fetch failed / not configured, and no inline params)
+  if(!P.company && !P.rep){
+    document.getElementById('contractDoc').style.display='none';
+    document.getElementById('loadError').style.display='block';
+    return;
+  }
+
+  var now = Date.now();
+  if(P.expires && now > parseInt(P.expires)){
+    document.getElementById('contractDoc').style.display='none';
+    document.getElementById('expiredBox').style.display='block';
+    return;
+  }
+  if(P.expires){
+    var days = Math.max(0, Math.ceil((parseInt(P.expires)-now)/86400000));
+    document.getElementById('expiry_txt').textContent = 'صالح لـ '+days+' يوم';
+  } else {
+    document.getElementById('expiry_txt').textContent = 'اتفاقية رسمية';
+  }
+
+  var cdate = P.contract_date || today;
+  document.getElementById('p_num').textContent = P.num;
+  document.getElementById('p_date').textContent = cdate;
+  document.getElementById('p1_date').textContent = today;
+  document.getElementById('p_company_card').textContent = P.company || '—';
+  document.getElementById('p_rep_card').textContent = (P.rep||'—') + (P.jobtitle?' — '+P.jobtitle:'');
+
+  if(P.type === 'general'){
+    document.getElementById('bodyHealth').style.display='none';
+    var g = document.getElementById('bodyGeneral');
+    g.style.display='block';
+    g.innerHTML = buildGeneralBody(cdate);
+    document.title = 'اتفاقية شراكة نوعية — عناية';
+    document.getElementById('agrText').textContent = agreeText('general');
+  } else {
+    document.getElementById('p_date2').textContent = cdate;
+    document.getElementById('p_company_h').textContent = P.company || '—';
+    document.getElementById('p_company').textContent = P.company || '—';
+    document.getElementById('p_company2').textContent = P.company || '—';
+    document.getElementById('p_lic').textContent = P.lic;
+    document.getElementById('p_addr').textContent = P.addr;
+    document.getElementById('p_tel').textContent = P.tel;
+    document.getElementById('p_po').textContent = P.po;
+    document.getElementById('p_rep').textContent = P.rep || '—';
+    document.getElementById('p_jobtitle').textContent = P.jobtitle || '—';
+    document.getElementById('p_phone').textContent = P.phone || '—';
+    document.getElementById('p_email').textContent = P.email || '—';
+    document.getElementById('ct_rep').textContent = P.rep || '—';
+    document.getElementById('ct_phone').textContent = P.phone || '—';
+    document.getElementById('ct_email').textContent = P.email || '—';
+    document.getElementById('agrText').textContent = agreeText('health');
+  }
+
+  if(P.status === 'signed') showAlreadySigned();
+}
+
+function agreeText(type){
+  if(type === 'general'){
+    return 'أقر وأؤكد بأنني اطلعت على جميع بنود هذه الاتفاقية (١٠ مواد) كاملةً، وأفهم التزاماتها، وأوافق عليها، وأن توقيعي الإلكتروني ملزم قانونياً وفق أنظمة المملكة العربية السعودية.';
+  }
+  return 'أقر وأؤكد بأنني اطلعت على جميع بنود هذه الاتفاقية الصحية (١٦ مادة) كاملةً، وأفهم التزاماتها، وأوافق عليها، وأن توقيعي الإلكتروني ملزم قانونياً وفق أنظمة المملكة العربية السعودية.';
+}
+
+function art(n,title,body,color){
+  var ncss = color ? ' style="background:'+color+'"' : '';
+  var tcss = color ? ' style="color:'+color+'"' : '';
+  return '<div class="art"><div class="art-head"><div class="art-n"'+ncss+'>'+n+'</div><div class="art-t"'+tcss+'>'+title+'</div></div><div class="art-body">'+body+'</div></div>';
+}
+
+function buildGeneralBody(cdate){
+  return ''
+  + '<h3>اتفاقية شراكة نوعية</h3>'
+  + '<div class="bismillah">بعون الله تعالى &nbsp;|&nbsp; '+esc(cdate)+'</div>'
+  + '<div class="intro-box">وفي يوم '+fvh(cdate)+' بمدينة الرياض، تم إبرام هذه الاتفاقية بين الجمعية الخيرية الصحية لرعاية المرضى (عناية) بوصفها الطرف الأول، و'+fvh(P.company)+' بوصفها الطرف الثاني — اتفاقية شراكة ودعم نوعية.</div>'
+  + art('١','الطرف الأول:','الجمعية الخيرية الصحية لرعاية المرضى (<strong>عناية</strong>)، برقم ترخيص <strong>(٣٦٤)</strong>، حي الربوة، الرياض، هاتف <strong>٩٢٠٠٢١٢٢٨</strong>. ويمثلها <strong>الدكتور / سلمان بن عبد الله المطيري</strong> (الأمين العام).','')
+  + art('٢','الطرف الثاني:','شركة / '+fvh(P.company)+' &nbsp;·&nbsp; ترخيص: '+fvh(P.lic)+'<br>ويمثلها في التوقيع: <strong>'+fvh(P.rep)+'</strong> ('+fvh(P.jobtitle)+')<br>جوال: '+fvh(P.phone)+' &nbsp;·&nbsp; بريد: <span dir="ltr">'+fvh(P.email)+'</span>','#555')
+  + art('٣','المادة (٣): موضوع الاتفاقية','تهدف هذه الاتفاقية إلى تنظيم أوجه التعاون والدعم المتبادل بين الطرفين لخدمة المجتمع وتحقيق الأهداف المشتركة.','')
+  + art('٤','المادة (٤): التزامات الطرف الأول','<ul><li>التنسيق والتواصل مع الطرف الثاني بشكل منتظم.</li><li>الإسهام في تنفيذ البرامج والفعاليات المشتركة.</li><li>توفير المواد التعريفية والتوعوية اللازمة.</li></ul>','')
+  + art('٥','المادة (٥): التزامات الطرف الثاني','<ul><li>التعاون مع الطرف الأول في تنفيذ الأنشطة المشتركة.</li><li>نشر المواد التعريفية الخاصة بالجمعية وفق المتفق عليه.</li><li>المشاركة في المبادرات الصحية والمجتمعية.</li></ul>','')
+  + art('٦','المادة (٦): مدة الاتفاقية','سنة واحدة ميلادية تبدأ من تاريخ التوقيع وتتجدد تلقائياً ما لم يُشعر أحد الطرفين بعدم التجديد قبل (٣٠) يوماً.','')
+  + art('٧','المادة (٧): إنهاء الاتفاقية','يحق لأي طرف إنهاء الاتفاقية بإشعار خطي قبل (٣٠) يوماً دون إسقاط الحقوق القائمة.','')
+  + art('٨','المادة (٨): السرية','يلتزم الطرفان بالمحافظة على سرية المعلومات والبيانات المتبادلة بينهما.','')
+  + art('٩','المادة (٩): الأنظمة المعمول بها','تخضع هذه الاتفاقية وتُفسَّر وفق الأنظمة واللوائح المعمول بها في المملكة العربية السعودية.','')
+  + art('١٠','المادة (١٠): أحكام عامة','أي تعديل على هذه الاتفاقية يكون بموجب ملحق مكتوب موقّع من الطرفين.','');
+}
+
+function showAlreadySigned(){
+  var ph = document.getElementById('p2placeholder');
+  if(ph){
+    ph.innerHTML = '<div style="text-align:center"><div style="font-size:24px">✅</div><div style="font-size:12px;font-weight:700;color:#059669">تم توقيع هذه الاتفاقية مسبقاً</div></div>';
+    ph.onclick = null; ph.style.cursor='default'; ph.style.borderColor='#86efac'; ph.style.background='#f0fdf4';
+  }
+  var sb = document.getElementById('submitBtn');
+  if(sb){ sb.disabled=true; sb.style.opacity='.5'; sb.innerHTML='✅ تم التوقيع مسبقاً'; }
+  var ag = document.getElementById('agr'); if(ag) ag.disabled=true;
+}
+
+// ===== CANVAS =====
+var sigMode='draw', canvasSigned=false, sigApplied=false;
+var isDrawing=false, lastX=0, lastY=0;
+
+function initCanvas(){
+  var c=document.getElementById('sigCanvas');
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  ctx.strokeStyle='#1a3050'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  function pos(e){
+    var r=c.getBoundingClientRect(), sx=c.width/r.width, sy=c.height/r.height;
+    if(e.touches) return{x:(e.touches[0].clientX-r.left)*sx,y:(e.touches[0].clientY-r.top)*sy};
+    return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
+  }
+  c.addEventListener('mousedown',function(e){isDrawing=true;var p=pos(e);lastX=p.x;lastY=p.y;});
+  c.addEventListener('mousemove',function(e){
+    if(!isDrawing)return;
+    var p=pos(e);ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    lastX=p.x;lastY=p.y; canvasSigned=true;
+    document.getElementById('canvasHint').textContent='✅ التوقيع جاهز';
+    document.getElementById('canvasHint').style.color='var(--green)';
+    document.getElementById('applyBtn').disabled=false;
+  });
+  c.addEventListener('mouseup',function(){isDrawing=false;});
+  c.addEventListener('mouseleave',function(){isDrawing=false;});
+  c.addEventListener('touchstart',function(e){e.preventDefault();isDrawing=true;var p=pos(e);lastX=p.x;lastY=p.y;},{passive:false});
+  c.addEventListener('touchmove',function(e){
+    e.preventDefault();if(!isDrawing)return;
+    var p=pos(e);ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    lastX=p.x;lastY=p.y; canvasSigned=true;
+    document.getElementById('applyBtn').disabled=false;
+  },{passive:false});
+  c.addEventListener('touchend',function(){isDrawing=false;});
+}
+
+function clearCanvas(){
+  var c=document.getElementById('sigCanvas');
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  canvasSigned=false;
+  document.getElementById('canvasHint').textContent='× ارسم هنا ×';
+  document.getElementById('canvasHint').style.color='#ccc';
+  document.getElementById('applyBtn').disabled=true;
+}
+
+function switchTab(mode){
+  sigMode=mode;
+  var isDraw=mode==='draw';
+  document.getElementById('panel_draw').style.display=isDraw?'block':'none';
+  document.getElementById('panel_type').style.display=isDraw?'none':'block';
+  document.getElementById('tab_draw').className='mtab '+(isDraw?'active':'inactive');
+  document.getElementById('tab_type').className='mtab '+(isDraw?'inactive':'active');
+  if(!isDraw){
+    var v=document.getElementById('typeInput').value.trim();
+    document.getElementById('applyBtn').disabled=v.length<2;
+  } else {
+    document.getElementById('applyBtn').disabled=!canvasSigned;
+  }
+}
+
+function onTypeInput(){
+  var v=document.getElementById('typeInput').value;
+  document.getElementById('typePreview').textContent=v||'—';
+  document.getElementById('applyBtn').disabled=v.trim().length<2;
+}
+
+function openModal(){
+  if(sigApplied)return;
+  document.getElementById('signModal').style.display='flex';
+  document.body.style.overflow='hidden';
+  setTimeout(initCanvas,50);
+}
+
+function closeModal(){
+  document.getElementById('signModal').style.display='none';
+  document.body.style.overflow='';
+}
+
+function applySignature(){
+  sigApplied=true;
+  var preview=document.getElementById('p2preview');
+  var pCtx=preview.getContext('2d');
+  pCtx.clearRect(0,0,preview.width,preview.height);
+  if(sigMode==='draw'){
+    var src=document.getElementById('sigCanvas');
+    pCtx.drawImage(src,0,0,src.width,src.height,0,0,preview.width,preview.height);
+  } else {
+    var name=document.getElementById('typeInput').value.trim();
+    pCtx.font='italic 26px Georgia,serif';
+    pCtx.fillStyle='#1a3050';
+    pCtx.textAlign='center';
+    pCtx.fillText(name,preview.width/2,38);
+    pCtx.beginPath();pCtx.moveTo(20,48);pCtx.lineTo(180,48);
+    pCtx.strokeStyle='#1a3050';pCtx.lineWidth=1;pCtx.globalAlpha=.3;pCtx.stroke();pCtx.globalAlpha=1;
+  }
+  document.getElementById('p2placeholder').style.display='none';
+  document.getElementById('p2result').style.display='flex';
+  document.getElementById('p2_date_disp').textContent=today;
+  document.getElementById('p2_date_disp').style.color=document.getElementById('p1_date').style.color||'var(--dark)';
+  document.getElementById('p2_verify').innerHTML='<div class="pdate">التحقق</div><div class="pverify" style="color:#059669">✓ موثّق</div>';
+  // update card to green
+  document.getElementById('party2card').querySelector('div').style.background='#d1fae5';
+  document.getElementById('party2card').querySelector('div').querySelector('div:last-child').style.color='#059669';
+  document.getElementById('p2_status_label').textContent='✓ موقّع';
+  document.getElementById('p2_status_label').style.color='#059669';
+  document.getElementById('party2inner').style.borderColor='#d1fae5';
+  closeModal();
+  chkSubmit();
+}
+
+function chkSubmit(){
+  var ok=sigApplied && document.getElementById('agr').checked;
+  document.getElementById('submitBtn').disabled=!ok;
+  document.getElementById('submitBtn').style.opacity=ok?'1':'.4';
+}
+
+// ===== SUBMIT & NOTIFY =====
+var _signatureData = '';
+var _signerName = '';
+function submitSignature(){
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg> جاري الحفظ...';
+
+  var t = new Date().toLocaleString('ar-SA');
+  var code = 'SIG-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();
+
+  // capture the applied signature as an image + signer name
+  try{ _signatureData = document.getElementById('p2preview').toDataURL('image/png'); }catch(e){ _signatureData=''; }
+  _signerName = (sigMode==='type' ? (document.getElementById('typeInput').value.trim()||P.rep) : (P.rep||'')) ;
+  P.sign_code = code; P.signed_at = t; P.signature = _signatureData; P.signer_name = _signerName;
+
+  // Show success
+  setTimeout(async function(){
+    btn.style.display='none';
+    document.getElementById('signedTime').textContent='وقت التوقيع: '+t;
+    document.getElementById('signRef').textContent=P.num;
+    document.getElementById('signCode').textContent=code;
+    document.getElementById('successBox').style.display='block';
+    document.getElementById('successBox').scrollIntoView({behavior:'smooth',block:'center'});
+
+    // Update Supabase (status + signature + signer)
+    await updateSupabase(code, t);
+
+    // Send WhatsApp notification to Enaya team
+    if(P.notify){
+      var notifyMsg = encodeURIComponent(
+        '🔔 *إشعار توقيع — عناية*\n\n'+
+        '✅ وقّع الطرف الثاني على الاتفاقية\n\n'+
+        '📋 الرقم المرجعي: *'+P.num+'*\n'+
+        '🏥 المنشأة: *'+P.company+'*\n'+
+        '👤 الممثل: *'+P.rep+'*\n'+
+        '📱 الجوال: '+P.phone+'\n'+
+        '📧 البريد: '+P.email+'\n'+
+        '🕐 وقت التوقيع: '+t+'\n'+
+        '🔐 كود التأكيد: '+code
+      );
+      window.open('https://wa.me/'+P.notify+'?text='+notifyMsg,'_blank');
+    }
+
+    // Send email notification if configured (mailto draft — تتطلب ضغط إرسال يدوي)
+    if(P.notify_email){
+      var emailSubject = encodeURIComponent('تم توقيع العقد بنجاح - رقم المرجع: '+P.num);
+      var emailBody = encodeURIComponent('تم توقيع الاتفاقية رقم '+P.num+' من قبل '+P.rep+' ('+P.company+')\n\nوقت التوقيع: '+t+'\nكود التأكيد: '+code);
+      window.open('mailto:'+P.notify_email+'?subject='+emailSubject+'&body='+emailBody,'_blank');
+    }
+  },1200);
+}
+
+// ===== CLIENT-SIDE PDF DOWNLOAD =====
+async function downloadClientPDF(){
+  if(typeof html2pdf === 'undefined'){ alert('تعذّر تحميل مكتبة PDF — تحقق من الاتصال'); return; }
+  var btn=document.getElementById('dlPdfBtn'); var old=btn.textContent; btn.textContent='⏳ جاري التوليد...'; btn.disabled=true;
+
+  // clone the document, drop interactive bits for a clean PDF
+  var src=document.getElementById('contractDoc').cloneNode(true);
+  var agree=src.querySelector('.agree-row'); if(agree) agree.remove();
+  var sbtn=src.querySelector('#submitBtn'); if(sbtn) sbtn.remove();
+  var succ=src.querySelector('#successBox'); if(succ) succ.remove();
+
+  // canvas pixels don't survive cloneNode → bake the signature in as an image
+  var canv=src.querySelector('#p2preview');
+  if(canv && _signatureData){
+    var img=document.createElement('img');
+    img.src=_signatureData; img.style.maxWidth='200px'; img.style.height='52px';
+    canv.parentNode.replaceChild(img, canv);
+  }
+
+  var holder=document.createElement('div');
+  holder.style.cssText='position:absolute;left:-9999px;top:0;background:#fff;width:780px;padding:24px';
+  holder.setAttribute('dir','rtl'); holder.appendChild(src);
+  document.body.appendChild(holder);
+  try{
+    await html2pdf().set({
+      margin:[8,8,8,8],
+      filename:(P.num||'contract')+'-موقّع.pdf',
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy','avoid-all']}
+    }).from(src).save();
+  }catch(e){ console.warn(e); alert('فشل توليد PDF'); }
+  document.body.removeChild(holder);
+  btn.textContent=old; btn.disabled=false;
+}
+
+// update via secure RPC (anon cannot touch the table directly)
+async function updateSupabase(code, t){
+  if(P.code && sbClient){
+    try{
+      await sbClient.rpc('submit_signature', {
+        p_code: P.code,
+        p_sign_code: code,
+        p_signature: P.signature || null,
+        p_signer_name: P.signer_name || null
+      });
+    }catch(e){ console.warn('submit failed', e); }
+  }
+}
+
+// kick off
+boot();
+</script>
+<style>
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+</style>
+</body>
+</html>

@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نظام اتفاقيات عناية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="config.js"></script>
+<style>
+:root{
+  --g:#1e6b45;--g2:#27875a;--g3:#e8f5ee;--g4:#c8e6d5;
+  --dark:#111827;--gray:#6b7280;--light:#f9fafb;--border:#e5e7eb;--white:#fff;
+  --gold:#b8860b;--red:#dc2626;--blue:#1d4ed8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;direction:rtl;background:#f3f4f6;color:var(--dark);min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--g);padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.topbar-logo{display:flex;align-items:center;gap:10px}
+.tlogo{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px}
+.topbar h1{color:#fff;font-size:15px;font-weight:800}
+.topbar p{color:rgba(255,255,255,.75);font-size:11px;margin-top:1px}
+.topbar-right{margin-right:auto;display:flex;align-items:center;gap:10px}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:5px 12px;border-radius:100px;font-size:11px;color:#fff;font-weight:600}
+.ldot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── LAYOUT ── */
+.container{max-width:1100px;margin:0 auto;padding:1.25rem 1rem}
+
+/* ── NAV TABS ── */
+.nav{display:flex;gap:3px;background:#fff;border-radius:12px;padding:5px;margin-bottom:1.25rem;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ntab{flex:1;padding:10px 8px;text-align:center;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Cairo',sans-serif;transition:all .15s}
+.ntab.active{background:var(--g);color:#fff;box-shadow:0 2px 8px rgba(30,107,69,.3)}
+.nbadge{background:#e24b4a;color:#fff;font-size:10px;padding:1px 6px;border-radius:100px}
+
+/* ── PAGE ── */
+.page{display:none}.page.active{display:block}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-title{font-size:14px;font-weight:700;color:var(--g);margin-bottom:1.25rem;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+
+/* ── CONTRACT TYPE SELECTOR ── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.type-card{border:2px solid var(--border);border-radius:12px;padding:1.25rem;cursor:pointer;transition:all .2s;background:#fff;text-align:center}
+.type-card:hover{border-color:var(--g);background:var(--g3)}
+.type-card.selected{border-color:var(--g);background:var(--g3);box-shadow:0 0 0 3px rgba(30,107,69,.15)}
+.type-card .type-icon{font-size:32px;margin-bottom:8px}
+.type-card .type-name{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:4px}
+.type-card .type-desc{font-size:11px;color:var(--gray);line-height:1.5}
+.type-badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-top:6px}
+.badge-health{background:#d1fae5;color:#065f46}
+.badge-general{background:#dbeafe;color:#1e40af}
+
+/* ── FORM ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.span2{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:600;color:var(--gray)}
+.field input,.field select{padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Cairo',sans-serif;background:#fff;color:var(--dark);width:100%;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(30,107,69,.1)}
+.req{color:#e24b4a}
+.hint{font-size:11px;color:#aaa;margin-top:2px}
+
+/* ── STEPS ── */
+.steps{display:flex;align-items:center;background:#fff;border-radius:12px;padding:12px 20px;border:1px solid var(--border);margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.st{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.stc{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid var(--border);background:var(--light);color:#aaa;transition:all .3s}
+.stc.active{background:var(--g);color:#fff;border-color:var(--g);box-shadow:0 2px 8px rgba(30,107,69,.3)}
+.stc.done{background:#059669;color:#fff;border-color:#059669}
+.stl{font-size:10px;color:var(--gray);text-align:center;font-weight:600;margin-top:2px}
+.stline{flex:1;height:2px;background:var(--border);margin-bottom:16px;border-radius:2px}
+
+/* ── BUTTONS ── */
+.btn{padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--dark);display:inline-flex;align-items:center;gap:7px;font-family:'Cairo',sans-serif;transition:all .15s}
+.btn:hover{background:var(--light)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{background:var(--g);color:#fff;border-color:var(--g)}
+.btn-primary:hover{background:var(--g2)}
+.btn-wa{background:#25d366;color:#fff;border-color:#25d366;width:100%;justify-content:center;padding:13px;font-size:14px;border-radius:10px}
+.btn-wa:hover{background:#1db954}
+.btn-em{background:#fff;color:#1d4ed8;border-color:#1d4ed8;width:100%;justify-content:center;padding:11px;font-size:13px;border-radius:10px;margin-top:8px}
+.btn-sm{padding:5px 12px;font-size:12px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.25rem;align-items:center}
+
+/* ── CONTRACT PREVIEW DOC ── */
+.doc-wrap{background:#fff;border:1px solid #d0d0c8;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:1rem}
+.doc-head{background:linear-gradient(135deg,#1e6b45,#27875a);padding:18px 24px}
+.doc-head-row{display:flex;align-items:center;justify-content:space-between}
+.doc-head h2{color:#fff;font-size:16px;font-weight:800}
+.doc-head p{color:rgba(255,255,255,.8);font-size:11px;margin-top:3px}
+.doc-num-box{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 14px;text-align:center}
+.doc-num-box small{display:block;font-size:9px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.doc-num-box span{color:#fff;font-size:14px;font-weight:800}
+.doc-strip{height:4px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.4),rgba(255,255,255,.1))}
+.doc-body{padding:2rem 2.5rem;font-size:13px;line-height:2;color:#1a1a1a;direction:rtl}
+.doc-body h3{text-align:center;font-size:18px;font-weight:800;color:var(--g);margin-bottom:.25rem}
+.bismillah{text-align:center;font-size:13px;color:var(--gray);font-style:italic;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.intro-box{background:var(--g3);border-right:4px solid var(--g);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;line-height:1.9}
+.art{margin-bottom:1.25rem}
+.art-head{display:flex;align-items:center;gap:8px;margin-bottom:.4rem}
+.art-n{width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.art-t{font-size:13px;font-weight:800;color:var(--g)}
+.art-body{padding-right:34px;font-size:13px;line-height:2;color:#2a2a2a}
+.art-body ul{margin-right:1.5rem;margin-top:.4rem}
+.art-body li{margin-bottom:.35rem}
+.sub-t{font-weight:700;color:var(--dark);margin-top:.75rem;margin-bottom:.2rem}
+.fv{background:#e8f5ee;border-bottom:2px solid var(--g);padding:0 5px 1px;color:#1a5c35;font-weight:700;border-radius:2px}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:.5rem}
+.ctbl th{background:var(--g);color:#fff;padding:7px 10px;text-align:center;font-weight:700}
+.ctbl td{padding:6px 10px;border:1px solid var(--border);text-align:center}
+.ctbl tr:nth-child(even) td{background:#f8faf9}
+.ptd{background:var(--g3);font-weight:700;color:var(--g)}
+
+/* sign section in preview */
+.sign-row{display:flex;gap:1rem;margin-top:1.5rem;padding-top:1.5rem;border-top:2px solid var(--border)}
+.sign-col{flex:1;text-align:center;padding:1rem;border:1px solid var(--border);border-radius:10px}
+.sign-col.done-col{border-color:#d1fae5;background:#f9fefb}
+.sign-col.wait-col{border-color:#fde68a;background:#fffdf5}
+.sign-col h4{font-size:12px;font-weight:700;margin-bottom:4px}
+.sign-col .srep{font-size:11px;color:var(--gray);margin-bottom:10px}
+.sig-line{border-bottom:2px solid #333;width:80%;margin:0 auto 4px;height:44px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.sig-label{font-size:10px;color:var(--gray)}
+.sig-svg{height:44px;display:flex;align-items:center;justify-content:center;background:#fafff9;border:1px solid var(--g4);border-radius:6px;margin-bottom:6px}
+
+/* ── SEND SECTION ── */
+.send-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem}
+.send-card-head{background:var(--g3);padding:14px 18px;border-bottom:1px solid var(--g4);display:flex;align-items:center;gap:10px}
+.send-card-head h3{font-size:14px;font-weight:700;color:var(--g)}
+.send-card-body{padding:1.25rem}
+.link-box{background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;direction:ltr}
+.link-box span{flex:1;font-size:12px;color:var(--gray);text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.copy-btn{flex-shrink:0;padding:4px 10px;font-size:11px;font-weight:700;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;color:var(--dark)}
+.copy-btn:hover{background:var(--g3);border-color:var(--g4);color:var(--g)}
+
+/* ── PROGRESS ── */
+.prog-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.prog-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;background:var(--light);border:1px solid var(--border);transition:all .4s}
+.prog-item.done{background:#EAF3DE;border-color:#97C459}
+.prog-ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:#fff;border:1px solid var(--border);transition:all .3s}
+.prog-txt{flex:1;font-size:13px;font-weight:500;color:var(--gray)}
+.prog-item.done .prog-txt{color:var(--g);font-weight:600}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spinning{animation:spin .8s linear infinite}
+
+/* ── SUCCESS ── */
+.success-wrap{display:none;text-align:center;padding:1.5rem}
+.success-wrap.show{display:block}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat-n{font-size:28px;font-weight:900;color:var(--g)}
+.stat-l{font-size:11px;color:var(--gray);font-weight:600;margin-top:2px}
+
+/* ── CONTRACTS LIST ── */
+.clist{display:flex;flex-direction:column;gap:8px}
+.crow{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.crow:hover{border-color:var(--g);box-shadow:0 3px 12px rgba(30,107,69,.12);transform:translateY(-1px)}
+.cav{width:42px;height:42px;border-radius:50%;background:var(--g3);border:1.5px solid var(--g4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--g);flex-shrink:0}
+.cinfo{flex:1;min-width:0}
+.cname{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmeta{font-size:11px;color:var(--gray);margin-top:2px;font-weight:500}
+.cbadge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+.b-sent{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+.b-signed{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+
+/* ── DETAIL ── */
+.detail-view{display:none}.detail-view.open{display:block}
+.back-btn{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--gray);margin-bottom:1rem;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;font-weight:600;font-family:'Cairo',sans-serif}
+.back-btn:hover{border-color:var(--g);color:var(--g)}
+.info-tbl{width:100%;font-size:13px;border-collapse:collapse}
+.info-tbl td{padding:9px 4px;border-bottom:1px solid var(--border)}
+.info-tbl td:first-child{color:var(--gray);width:150px;font-weight:600}
+.info-tbl td:last-child{font-weight:600}
+.info-tbl tr:last-child td{border-bottom:none}
+.tl{display:flex;flex-direction:column}
+.tl-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.tl-row:last-child{border-bottom:none}
+.tld{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.dot-g{background:var(--g)}.dot-b{background:var(--blue)}.dot-a{background:#f59e0b}
+.tlt{flex:1;font-size:13px;color:var(--gray);font-weight:500}
+.tltime{font-size:11px;color:#aaa}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid var(--g4);border-radius:12px;padding:12px 20px;font-size:13px;color:var(--g);z-index:9999;direction:rtl;box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;font-weight:700;animation:toastIn .3s ease;max-width:400px}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+/* ── SETUP BANNER ── */
+.setup-banner{background:linear-gradient(135deg,#1e3a5f,#1e6b45);border-radius:14px;padding:1.5rem;margin-bottom:1rem;color:#fff;display:flex;align-items:flex-start;gap:14px}
+.setup-banner h3{font-size:15px;font-weight:800;margin-bottom:6px}
+.setup-banner p{font-size:12px;opacity:.85;line-height:1.7}
+.setup-input{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 12px;font-size:13px;color:#fff;width:100%;font-family:'Cairo',sans-serif;margin-top:8px;outline:none}
+.setup-input::placeholder{color:rgba(255,255,255,.6)}
+.setup-btn{margin-top:8px;padding:8px 18px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.setup-btn:hover{background:rgba(255,255,255,.3)}
+
+@media(max-width:640px){
+  .grid2{grid-template-columns:1fr}.span2{grid-column:1}
+  .type-grid{grid-template-columns:1fr}
+  .sign-row{flex-direction:column}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN GATE (يظهر قبل الدخول) ═══════════ -->
+<div id="authGate" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1e6b45,#27875a);display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:18px;padding:32px 26px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:20px">
+      <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png" style="height:54px;object-fit:contain" onerror="this.style.display='none'"/>
+      <h2 style="font-size:18px;color:#1e6b45;margin:12px 0 4px">منصة عناية للعقود</h2>
+      <p style="font-size:13px;color:#6b7280">تسجيل دخول المُرسِلين المعتمدين</p>
+    </div>
+    <div id="authError" style="display:none;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px"></div>
+    <input id="authEmail" type="email" dir="ltr" placeholder="البريد الإلكتروني" style="width:100%;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin-bottom:10px;font-family:inherit;font-size:14px"/>
+    <input id="authPass" type="password" dir="ltr" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin-bottom:14px;font-family:inherit;font-size:14px"/>
+    <button onclick="doLogin()" id="authBtn" style="width:100%;background:#1e6b45;color:#fff;border:none;border-radius:10px;padding:13px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer">دخول</button>
+    <p id="authConfigWarn" style="display:none;font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;margin-top:14px;line-height:1.7">⚠️ قاعدة البيانات غير مُعدّة. عبّئ مفاتيح Supabase في config.js أولاً (راجع SETUP-supabase.md).</p>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-logo">
+      <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+           alt="شعار عناية"
+           style="height:48px;width:auto;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0"
+           onerror="this.style.display='none';document.getElementById('logo-fallback-idx').style.display='flex'"/>
+      <div id="logo-fallback-idx" style="display:none;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏥</div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,.25);flex-shrink:0"></div>
+      <div>
+        <h1>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</h1>
+        <p>نظام إرسال الاتفاقيات الإلكترونية — علاج ووقاية</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div id="userChip" style="display:none;align-items:center;gap:10px">
+        <button id="usersBtn" onclick="openUsers()" style="display:none;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:12px;cursor:pointer">👥 المستخدمون</button>
+        <span id="userName" style="color:#fff;font-size:13px;font-weight:600"></span>
+        <button onclick="doLogout()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:12px;cursor:pointer">خروج</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="appContainer" style="display:none">
+
+  <!-- NAV -->
+  <div class="nav">
+    <button class="ntab active" onclick="goPage('send',this)">📤 إرسال اتفاقية</button>
+    <button class="ntab" onclick="goPage('list',this)">📋 الاتفاقيات <span class="nbadge" id="nb">0</span></button>
+  </div>
+
+  <!-- ═══════════════ PAGE: SEND ═══════════════ -->
+  <div class="page active" id="page-send">
+
+    <!-- STEPS -->
+    <div class="steps">
+      <div class="st"><div class="stc active" id="sc1">١</div><div class="stl">نوع الاتفاقية</div></div>
+      <div class="stline"></div>
+      <div class="st"><div class="stc" id="sc2">٢</div><div class="stl">بيانات الطرف الثاني</div></div>
+      <div class="stline"></div>
+      <div class="st"><div class="stc" id="sc3">٣</div><div class="stl">مراجعة الاتفاقية</div></div>
+      <div class="stline"></div>
+      <div class="st"><div class="stc" id="sc4">٤</div><div class="stl">الإرسال</div></div>
+    </div>
+
+    <!-- STEP 1: Contract Type -->
+    <div id="s1">
+      <div class="card">
+        <div class="card-title">📄 اختر نوع الاتفاقية</div>
+        <div class="type-grid">
+          <div class="type-card selected" id="tc_health" onclick="selectType('health')">
+            <div class="type-icon">🏥</div>
+            <div class="type-name">اتفاقية صحية</div>
+            <div class="type-desc">شراكة في تقديم الخدمات الصحية والعلاجية للمستفيدين</div>
+            <div class="type-badge badge-health">١٦ مادة</div>
+          </div>
+          <div class="type-card" id="tc_general" onclick="selectType('general')">
+            <div class="type-icon">🤝</div>
+            <div class="type-name">اتفاقية نوعية</div>
+            <div class="type-desc">شراكة عامة للتعاون والدعم بدون خدمات صحية مباشرة</div>
+            <div class="type-badge badge-general">١٠ مواد</div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="goS2()">التالي — بيانات الطرف الثاني ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Client Data -->
+    <div id="s2" style="display:none">
+      <div class="card">
+        <div class="card-title">🏥 بيانات الطرف الثاني</div>
+        <div class="grid2">
+          <div class="field span2">
+            <label>اسم الشركة / المنشأة <span class="req">*</span></label>
+            <input id="f_company" placeholder="مستشفى / عيادة / شركة / مركز..." oninput="chk2()"/>
+          </div>
+          <div class="field">
+            <label>رقم الترخيص</label>
+            <input id="f_lic" placeholder="1010xxxxxx"/>
+          </div>
+          <div class="field">
+            <label>العنوان</label>
+            <input id="f_addr" placeholder="حي — مدينة الرياض طريق..."/>
+          </div>
+          <div class="field">
+            <label>ممثل التوقيع <span class="req">*</span></label>
+            <input id="f_rep" placeholder="د. / أ. الاسم الكامل" oninput="chk2()"/>
+          </div>
+          <div class="field">
+            <label>المسمى الوظيفي</label>
+            <input id="f_jobtitle" placeholder="المدير العام / الرئيس التنفيذي"/>
+          </div>
+          <div class="field">
+            <label>رقم الجوال <span class="req">*</span></label>
+            <input id="f_phone" placeholder="05xxxxxxxx" oninput="chk2()"/>
+          </div>
+          <div class="field">
+            <label>البريد الإلكتروني <span class="req">*</span></label>
+            <input id="f_email" type="email" placeholder="name@example.sa" dir="ltr" oninput="chk2()"/>
+          </div>
+          <div class="field">
+            <label>هاتف المنشأة</label>
+            <input id="f_tel" placeholder="011xxxxxxx"/>
+          </div>
+          <div class="field">
+            <label>صندوق البريد</label>
+            <input id="f_po" placeholder="ص.ب"/>
+          </div>
+          <div class="field">
+            <label>تاريخ الاتفاقية</label>
+            <input id="f_date" type="date"/>
+          </div>
+          <div class="field">
+            <label>الرقم المرجعي</label>
+            <input id="f_num" placeholder="يُولَّد تلقائياً — CNT-2026-0001"/>
+            <div class="hint">اتركه فارغاً للترقيم التلقائي الفريد</div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="backS1()">← رجوع</button>
+        <button class="btn btn-primary" id="btn2" disabled onclick="goS3()">مراجعة الاتفاقية ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Contract Preview -->
+    <div id="s3" style="display:none">
+      <div style="background:#EAF3DE;border:1px solid var(--g4);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--g);margin-bottom:1rem;font-weight:600">
+        ✅ راجع الاتفاقية — البيانات الخضراء هي بيانات الطرف الثاني. إذا صحيحة اضغط "إرسال".
+      </div>
+
+      <div class="doc-wrap" id="contractPreview">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="backS2()">← تعديل البيانات</button>
+        <button class="btn btn-primary" onclick="goS4()">إرسال الاتفاقية الآن 🚀</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Send -->
+    <div id="s4" style="display:none">
+      <div class="card">
+        <div class="card-title" id="s4title">⏳ جاري الإرسال...</div>
+        <div class="prog-list">
+          <div class="prog-item" id="pr1"><div class="prog-ico">📄</div><div class="prog-txt">إنشاء الاتفاقية وتوليد رابط التوقيع الفريد</div></div>
+          <div class="prog-item" id="pr2"><div class="prog-ico">💾</div><div class="prog-txt">حفظ الاتفاقية في قاعدة البيانات</div></div>
+          <div class="prog-item" id="pr3"><div class="prog-ico">💬</div><div class="prog-txt">فتح واتساب برسالة جاهزة للإرسال</div></div>
+          <div class="prog-item" id="pr4"><div class="prog-ico">📧</div><div class="prog-txt">فتح الإيميل برسالة جاهزة للإرسال</div></div>
+        </div>
+        <div class="success-wrap" id="successWrap">
+          <div style="font-size:52px;margin-bottom:.75rem">✅</div>
+          <div style="font-size:18px;font-weight:800;color:var(--g);margin-bottom:.4rem">تم بنجاح!</div>
+          <div style="font-size:13px;color:var(--gray);margin-bottom:1.25rem">الاتفاقية محفوظة — افتح واتساب وإيميل وأرسل الرسائل للعميل</div>
+          <div style="background:var(--g3);border:1px solid var(--g4);border-radius:10px;padding:12px 20px;font-size:13px;color:var(--g);display:inline-block;margin-bottom:.75rem;font-weight:600" id="s_detail"></div>
+        </div>
+      </div>
+      <div id="sendActions" style="display:none">
+        <!-- WA button -->
+        <button class="btn-wa" onclick="openWA()" id="waBtn">💬 افتح واتساب وأرسل للعميل</button>
+        <!-- Email button -->
+        <button class="btn-em" onclick="openEmail()" id="emBtn">📧 افتح الإيميل وأرسل للعميل</button>
+        <div style="margin-top:1rem;background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+          <div style="font-size:12px;color:var(--gray);font-weight:600;margin-bottom:6px">رابط التوقيع — شاركه مع العميل:</div>
+          <div class="link-box">
+            <span id="linkDisplay">—</span>
+            <button class="copy-btn" onclick="copyLink()">نسخ</button>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:1rem">
+          <button class="btn btn-primary" onclick="freshForm()">+ اتفاقية جديدة</button>
+          <button class="btn" onclick="goPage('list',null)">📋 عرض الاتفاقيات</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-send -->
+
+  <!-- ═══════════════ PAGE: LIST ═══════════════ -->
+  <div class="page" id="page-list">
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-n" id="stat_total">0</div><div class="stat-l">إجمالي</div></div>
+      <div class="stat-card"><div class="stat-n" id="stat_pending" style="color:var(--blue)">0</div><div class="stat-l">بانتظار التوقيع</div></div>
+      <div class="stat-card"><div class="stat-n" id="stat_signed">0</div><div class="stat-l">موقّعة</div></div>
+    </div>
+
+    <div id="listMain">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <div style="font-size:14px;font-weight:700;color:var(--g)">الاتفاقيات المرسلة</div>
+          <button class="btn btn-sm" onclick="loadContracts()" style="font-size:11px">🔄 تحديث</button>
+        </div>
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border)">
+          <input id="searchBox" oninput="renderRows()" placeholder="🔎 ابحث برقم المرجع أو اسم المنشأة أو الممثل..."
+                 style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:inherit;font-size:13px"/>
+        </div>
+        <div id="listBody" style="padding:12px">
+          <div style="text-align:center;padding:2.5rem;color:#aaa;font-size:13px">جاري التحميل...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-view" id="detailMain">
+      <button class="back-btn" onclick="closeDetail()">← رجوع للقائمة</button>
+      <div id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PAGE: SETTINGS (مخفية — تُفتح عبر #settings فقط) ═══════════ -->
+  <div class="page" id="page-settings">
+    <button class="back-btn" onclick="goPage('send',null);location.hash='';document.querySelectorAll('.ntab')[0].classList.add('active')">← رجوع لإرسال اتفاقية</button>
+    <div class="setup-banner">
+      <div style="font-size:32px;flex-shrink:0">⚙️</div>
+      <div style="flex:1">
+        <h3>إعدادات النظام (صفحة مخفية)</h3>
+        <p>القيم الأساسية مضبوطة في ملف config.js. هذه الصفحة لتعديل سريع من المتصفح يُحفظ على هذا الجهاز فقط ويغلب على config.js. لا تظهر في الشريط العلوي ولا يراها العميل.</p>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px">
+          <input class="setup-input" id="cfg_url" placeholder="Supabase URL — https://xxxx.supabase.co"/>
+          <input class="setup-input" id="cfg_key" placeholder="Supabase Anon Key"/>
+          <input class="setup-input" id="cfg_notify" placeholder="رقم واتساب الإشعار — 9665xxxxxxxx (بدون +)"/>
+          <input class="setup-input" id="cfg_notify_email" placeholder="إيميل الإشعار — للتوقيع الجديد"/>
+          <input class="setup-input" id="cfg_base_url" placeholder="رابط الموقع — https://drkuk.github.io/enaya-sign"/>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="setup-btn" onclick="saveSettings()">💾 حفظ على هذا الجهاز</button>
+          <button class="setup-btn" style="background:rgba(255,255,255,.1)" onclick="resetSettings()">↺ إعادة لإعدادات config.js</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">ℹ️ ملاحظة</div>
+      <div style="font-size:13px;color:var(--gray);line-height:2">
+        تعليمات إنشاء جدول Supabase موجودة كاملةً داخل ملف <strong>config.js</strong> (في الأسفل كتعليقات). صفحة التوقيع <strong>sign.html</strong> تقرأ مفاتيح Supabase من config.js وحده — لا تتأثر بما تحفظه هنا، لأن هذه التعديلات محلية على جهازك أنت فقط.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PAGE: USERS (للمسؤول فقط) ═══════════ -->
+  <div class="page" id="page-users">
+    <button class="back-btn" onclick="goPage('send',null);document.querySelectorAll('.ntab')[0].classList.add('active')">← رجوع</button>
+    <div class="card">
+      <div class="card-title">👥 إدارة المُرسِلين</div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.9;margin-bottom:10px">إضافة حساب جديد تتم من Supabase → Authentication، ثم تعيين الدور عبر schema (راجع SETUP-supabase.md). هنا يمكنك إيقاف/تفعيل الصلاحيات فوراً.</div>
+      <div id="usersBody"></div>
+    </div>
+  </div>
+
+  <div id="pdfHolder" style="position:absolute;left:-9999px;top:0;pointer-events:none"></div>
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════
+var SHARED = window.ENAYA_CONFIG || {};
+function _validURL(v){ v = v || ''; return v.indexOf('http') === 0 ? v : ''; }
+function _validKey(v){ v = v || ''; return v.length > 20 ? v : ''; }
+function _ls(key, fallback){ var v = localStorage.getItem(key); return v !== null ? v : fallback; }
+
+// القيم تأتي من config.js افتراضياً، وأي تعديل من صفحة الإعدادات المخفية يُحفظ محلياً ويغلب عليها
+var CFG = {
+  url: _validURL(_ls('enaya_url', SHARED.SUPABASE_URL)),
+  key: _validKey(_ls('enaya_key', SHARED.SUPABASE_KEY)),
+  notify: _ls('enaya_notify', SHARED.NOTIFY_WHATSAPP || ''),
+  notify_email: _ls('enaya_notify_email', SHARED.NOTIFY_EMAIL || ''),
+  base_url: (_ls('enaya_base_url', SHARED.BASE_URL || '') || (window.location.origin + window.location.pathname.replace('index.html',''))).replace(/\/$/, '')
+};
+
+var sbClient = null;
+function initSupabase(){
+  if(CFG.url && CFG.key && window.supabase){
+    sbClient = window.supabase.createClient(CFG.url, CFG.key);
+  }
+}
+initSupabase();
+
+// ══════════════════════════════════
+// AUTH + ROLES (Supabase Auth)
+// ══════════════════════════════════
+var CURRENT_USER = null;   // { id, email, full_name, role }
+
+async function bootAuth(){
+  if(!sbClient){
+    // لا قاعدة بيانات → لا يمكن الدخول؛ أظهر تنبيه الإعداد
+    document.getElementById('authConfigWarn').style.display = 'block';
+    document.getElementById('authBtn').disabled = true;
+    return;
+  }
+  try{
+    var { data } = await sbClient.auth.getSession();
+    if(data && data.session){ await onLoggedIn(); }
+  }catch(e){ console.warn(e); }
+}
+
+async function doLogin(){
+  var err = document.getElementById('authError'); err.style.display='none';
+  if(!sbClient){ err.textContent='قاعدة البيانات غير مُعدّة (config.js).'; err.style.display='block'; return; }
+  var email = document.getElementById('authEmail').value.trim();
+  var pass  = document.getElementById('authPass').value;
+  var btn = document.getElementById('authBtn'); btn.disabled=true; btn.textContent='جاري الدخول...';
+  try{
+    var { error } = await sbClient.auth.signInWithPassword({ email: email, password: pass });
+    if(error){ err.textContent='بيانات الدخول غير صحيحة'; err.style.display='block'; }
+    else { await onLoggedIn(); }
+  }catch(e){ err.textContent='تعذّر الاتصال بالخادم'; err.style.display='block'; }
+  btn.disabled=false; btn.textContent='دخول';
+}
+
+async function onLoggedIn(){
+  // اقرأ دور المستخدم من app_users
+  try{
+    var { data: { user } } = await sbClient.auth.getUser();
+    var { data: rows } = await sbClient.from('app_users').select('*').eq('id', user.id).limit(1);
+    if(!rows || !rows.length || rows[0].active === false){
+      document.getElementById('authError').textContent = 'حسابك غير مُفعّل. تواصل مع المسؤول.';
+      document.getElementById('authError').style.display='block';
+      await sbClient.auth.signOut();
+      return;
+    }
+    CURRENT_USER = rows[0];
+  }catch(e){
+    document.getElementById('authError').textContent = 'تعذّر قراءة الصلاحيات. تأكد من تشغيل schema.sql.';
+    document.getElementById('authError').style.display='block';
+    return;
+  }
+  // أظهر التطبيق
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'block';
+  document.getElementById('userChip').style.display = 'flex';
+  document.getElementById('userName').textContent = (CURRENT_USER.full_name || CURRENT_USER.email) + (CURRENT_USER.role==='admin' ? ' (مسؤول)' : '');
+  if(CURRENT_USER.role === 'admin') document.getElementById('usersBtn').style.display = 'inline-block';
+  updateBadge();
+}
+
+async function doLogout(){
+  if(sbClient) await sbClient.auth.signOut();
+  location.reload();
+}
+
+// ══════════════════════════════════
+// ADMIN: USER MANAGEMENT
+// ══════════════════════════════════
+async function openUsers(){
+  if(!CURRENT_USER || CURRENT_USER.role!=='admin') return;
+  goPage('users', null);
+  var box = document.getElementById('usersBody');
+  box.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#aaa">جاري التحميل...</div>';
+  try{
+    var { data } = await sbClient.from('app_users').select('*').order('created_at',{ascending:true});
+    box.innerHTML = (data||[]).map(function(u){
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)">' +
+        '<div><div style="font-weight:700;font-size:13px">'+esc(u.full_name||u.email)+'</div>' +
+        '<div style="font-size:11px;color:var(--gray)" dir="ltr">'+esc(u.email)+'</div></div>' +
+        '<div style="display:flex;gap:6px;align-items:center">' +
+        '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:'+(u.role==='admin'?'#e8f5ee;color:#1e6b45':'#eef2ff;color:#3730a3')+'">'+(u.role==='admin'?'مسؤول':'مُرسِل')+'</span>' +
+        '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:'+(u.active?'#dcfce7;color:#166534':'#fee2e2;color:#991b1b')+'">'+(u.active?'مفعّل':'موقوف')+'</span>' +
+        (u.id!==CURRENT_USER.id ? '<button class="btn btn-sm" onclick="toggleUser(\''+u.id+'\','+(!u.active)+')">'+(u.active?'إيقاف':'تفعيل')+'</button>' : '') +
+        '</div></div>';
+    }).join('') || '<div style="color:#aaa">لا مستخدمين</div>';
+  }catch(e){ box.innerHTML='<div style="color:#b91c1c">تعذّر التحميل</div>'; }
+}
+
+async function toggleUser(id, active){
+  try{ await sbClient.from('app_users').update({active:active}).eq('id',id); openUsers(); showToast('تم التحديث'); }
+  catch(e){ showToast('⚠️ فشل التحديث'); }
+}
+
+
+// ── صفحة الإعدادات المخفية (تُفتح عبر index.html#settings فقط) ──
+function fillSettings(){
+  document.getElementById('cfg_url').value = CFG.url;
+  document.getElementById('cfg_key').value = CFG.key;
+  document.getElementById('cfg_notify').value = CFG.notify;
+  document.getElementById('cfg_notify_email').value = CFG.notify_email;
+  document.getElementById('cfg_base_url').value = CFG.base_url;
+}
+
+function saveSettings(){
+  CFG.url = document.getElementById('cfg_url').value.trim();
+  CFG.key = document.getElementById('cfg_key').value.trim();
+  CFG.notify = document.getElementById('cfg_notify').value.trim();
+  CFG.notify_email = document.getElementById('cfg_notify_email').value.trim();
+  CFG.base_url = document.getElementById('cfg_base_url').value.trim().replace(/\/$/, '');
+  localStorage.setItem('enaya_url', CFG.url);
+  localStorage.setItem('enaya_key', CFG.key);
+  localStorage.setItem('enaya_notify', CFG.notify);
+  localStorage.setItem('enaya_notify_email', CFG.notify_email);
+  localStorage.setItem('enaya_base_url', CFG.base_url);
+  initSupabase();
+  showToast('✅ تم حفظ الإعدادات');
+}
+
+// إعادة الإعدادات لقيم config.js (مسح التعديلات المحلية)
+function resetSettings(){
+  ['enaya_url','enaya_key','enaya_notify','enaya_notify_email','enaya_base_url'].forEach(function(k){ localStorage.removeItem(k); });
+  showToast('✅ تمت الإعادة لإعدادات config.js — حدّث الصفحة');
+}
+
+// ══════════════════════════════════
+// STATE  (قاعدة البيانات هي المصدر الوحيد — لا تخزين محلي للعقود)
+// ══════════════════════════════════
+var contractType = 'health';
+var currentContract = null;
+var currentSignLink = '';
+var currentWAMsg = '';
+var currentEmMsg = '';
+
+function saveLocal(){ /* لم يعد يُستخدم — العقود تُحفظ في قاعدة البيانات */ }
+
+// ══════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════
+function goPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn){ document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  else { var idx={send:0,list:1}[name]; if(idx!==undefined) document.querySelectorAll('.ntab')[idx].classList.add('active'); }
+  if(name==='list') loadContracts();
+  if(name==='settings') fillSettings();
+}
+
+function setStep(n){
+  for(var i=1;i<=4;i++){
+    var el=document.getElementById('sc'+i); el.classList.remove('active','done');
+    if(i<n){el.classList.add('done');el.textContent='✓';}
+    else if(i===n){el.classList.add('active');el.textContent=['١','٢','٣','٤'][i-1];}
+    else el.textContent=['١','٢','٣','٤'][i-1];
+  }
+}
+
+// ══════════════════════════════════
+// STEP 1
+// ══════════════════════════════════
+function selectType(t){
+  contractType=t;
+  document.getElementById('tc_health').classList.toggle('selected', t==='health');
+  document.getElementById('tc_general').classList.toggle('selected', t==='general');
+}
+
+function goS2(){ show('s2'); hide('s1'); setStep(2); window.scrollTo({top:0,behavior:'smooth'}); }
+function backS1(){ show('s1'); hide('s2'); setStep(1); }
+
+// ══════════════════════════════════
+// STEP 2
+// ══════════════════════════════════
+document.getElementById('f_date').valueAsDate = new Date();
+
+function chk2(){
+  var ok = V('f_company') && V('f_rep') && V('f_phone') && V('f_email');
+  document.getElementById('btn2').disabled = !ok;
+}
+function V(id){ return document.getElementById(id).value.trim(); }
+
+// ── توليد رقم مرجعي تسلسلي فريد: CNT-YYYY-NNNN ──
+// مع Supabase: يأخذ آخر رقم للسنة ويزيد عليه (موثوق عبر الأجهزة)
+// بدونها: عدّاد محلي على هذا الجهاز فقط (قد يتعارض بين الأجهزة)
+async function genRef(){
+  if(sbClient){
+    try{
+      var { data, error } = await sbClient.rpc('next_ref');
+      if(!error && data) return data;
+    }catch(e){ console.warn('next_ref failed', e); }
+  }
+  // fallback (وضع بلا قاعدة — للتجربة فقط)
+  var year = new Date().getFullYear();
+  var seq = parseInt(localStorage.getItem('enaya_seq_'+year) || '0', 10) + 1;
+  localStorage.setItem('enaya_seq_'+year, seq);
+  return 'CNT-' + year + '-' + String(seq).padStart(4,'0');
+}
+
+// ══════════════════════════════════
+// STEP 3: Build contract preview
+// ══════════════════════════════════
+var _buildingS3 = false;
+async function goS3(){
+  if(_buildingS3) return;
+  _buildingS3 = true;
+  var btn2 = document.getElementById('btn2');
+  var btnTxt = btn2.textContent; btn2.disabled = true; btn2.textContent = 'جاري توليد الرقم المرجعي...';
+
+  var num = V('f_num') || await genRef();
+  var dateEl = document.getElementById('f_date');
+  var d = dateEl.value ? new Date(dateEl.value) : new Date();
+  var dateStr = d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+
+  currentContract = {
+    num, type: contractType,
+    company: V('f_company'), rep: V('f_rep'), jobtitle: V('f_jobtitle'),
+    phone: V('f_phone'), email: V('f_email'), lic: V('f_lic') || '—',
+    addr: V('f_addr') || '—', tel: V('f_tel') || '—', po: V('f_po') || '—',
+    contract_date: dateStr, status: 'sent',
+    created_at: new Date().toISOString()
+  };
+
+  document.getElementById('contractPreview').innerHTML = buildContractHTML(currentContract);
+  show('s3'); hide('s2'); setStep(3);
+  document.getElementById('s3').scrollIntoView({behavior:'smooth',block:'start'});
+  btn2.disabled = false; btn2.textContent = btnTxt; _buildingS3 = false;
+}
+
+function backS2(){ show('s2'); hide('s3'); setStep(2); }
+
+// ══════════════════════════════════
+// BUILD CONTRACT HTML
+// ══════════════════════════════════
+function fv(val){ return '<span class="fv">'+(val||'—')+'</span>'; }
+
+function buildContractHTML(c){
+  if(c.type === 'health') return buildHealth(c);
+  return buildGeneral(c);
+}
+
+function buildHealth(c){
+  return `
+  <div class="doc-head">
+    <div class="doc-head-row">
+      <div style="display:flex;align-items:center;gap:14px">
+        <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+             alt="عناية" style="height:56px;width:auto;object-fit:contain;filter:brightness(0) invert(1)"
+             onerror="this.style.display='none'"/>
+        <div>
+          <h2>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</h2>
+          <p>اتفاقية صحية إلكترونية رسمية — آمنة ومشفرة 🔒</p>
+        </div>
+      </div>
+      <div class="doc-num-box"><small>الرقم المرجعي</small><span>${c.num}</span></div>
+    </div>
+  </div>
+    <div class="bismillah">بعون الله تعالى | ${c.contract_date}</div>
+    <div class="intro-box">وفي يوم ${fv(c.contract_date)} بمدينة الرياض، تم إبرام هذه الاتفاقية الصحية بين الجمعية الخيرية الصحية لرعاية المرضى (عناية) بوصفها الطرف الأول، ومنشأة ${fv(c.company)} بوصفها الطرف الثاني.</div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١</div><div class="art-t">الطرف الأول (الجمعية):</div></div>
+    <div class="art-body">الجمعية الخيرية الصحية لرعاية المرضى (<strong>عناية</strong>) — برقم ترخيص <strong>(٣٦٤)</strong>، حي الربوة، الرياض، هاتف <strong>٩٢٠٠٢١٢٢٨</strong>. ويمثلها <strong>الدكتور / سلمان بن عبد الله المطيري</strong> (الأمين العام).</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n" style="background:#555">٢</div><div class="art-t" style="color:#555">الطرف الثاني (المنشأة الصحية):</div></div>
+    <div class="art-body">
+      شركة / ${fv(c.company)} · ترخيص: ${fv(c.lic)} · عنوانها الرياض ${fv(c.addr)}<br>
+      هاتف: ${fv(c.tel)} · ص.ب: ${fv(c.po)}<br>
+      ممثل التوقيع: <strong>${fv(c.rep)}</strong> (${fv(c.jobtitle)})<br>
+      جوال: ${fv(c.phone)} · بريد: ${fv(c.email)}
+    </div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٢</div><div class="art-t">المادة (٢): موضوع الاتفاقية</div></div>
+    <div class="art-body">تهدف هذه الاتفاقية إلى تنظيم أوجه التعاون في تقديم الخدمات الصحية وتعزيز المسؤولية المجتمعية من خلال: الشراكة في العلاج، والتسويق والإعلام، والأنشطة التطوعية.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٣</div><div class="art-t">المادة (٣): التزامات الطرف الأول</div></div>
+    <div class="art-body"><ul>
+      <li>إحالة الحالات المستحقة وتزويد الطرف الثاني بالبيانات اللازمة.</li>
+      <li>الالتزام بسداد تكاليف الخدمات العلاجية المعتمدة.</li>
+      <li>متابعة الحالات المحالة والتنسيق مع الطرف الثاني.</li>
+      <li>إنشاء حساب على النظام التقني وتزويد الطرف الثاني ببيانات الدخول.</li>
+    </ul></div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٤</div><div class="art-t">المادة (٤): التزامات الطرف الثاني</div></div>
+    <div class="art-body"><ul>
+      <li>تزويد الطرف الأول بقائمة الخدمات الطبية وأسعارها وفق النموذج المعتمد.</li>
+      <li>تقديم الخدمات العلاجية للمستفيدين وفق الأنظمة الصحية المعمول بها.</li>
+      <li>استقبال المستفيدين الصادر لهم تعميد والالتزام بالتكلفة المعتمدة.</li>
+      <li>المساهمة بنسبة (٥٪) من صافي قيمة الحوالات الشهرية لدعم استدامة المشاريع.</li>
+    </ul></div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٥</div><div class="art-t">المادة (٥): التقييم والمعايير</div></div>
+    <div class="art-body">يخضع الطرف الثاني لتقييم دوري من قبل الطرف الأول لقياس مستوى الالتزام وجودة الأداء.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٦</div><div class="art-t">المادة (٦): مدة الاتفاقية</div></div>
+    <div class="art-body">سنة واحدة ميلادية تتجدد تلقائياً ما لم يُشعر أحد الطرفين بعدم التجديد قبل (٣٠) يوماً.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٧</div><div class="art-t">المادة (٧): إنهاء الاتفاقية</div></div>
+    <div class="art-body">يحق لأي طرف الإنهاء بإشعار خطي بما لا يقل عن (٣٠) يوماً دون إسقاط الحقوق المالية القائمة.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٨</div><div class="art-t">المادة (٨): المدد الزمنية والمطالبات</div></div>
+    <div class="art-body"><ul>
+      <li>تأكيد الاستقبال: خلال (٧) أيام من التعميد.</li>
+      <li>تقديم الخدمة: خلال (٣٠) يوماً من الاستقبال.</li>
+      <li>رفع المطالبة: خلال (١٠) أيام من اكتمال الخدمة.</li>
+    </ul></div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٩</div><div class="art-t">المادة (٩): أحكام المطالبات المالية</div></div>
+    <div class="art-body">يسدد الطرف الأول المستحقات خلال (١٤) يوماً من تقديم المطالبة الصحيحة.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٠</div><div class="art-t">المادة (١٠): القوة القاهرة</div></div>
+    <div class="art-body">يُعفى الطرفان من الالتزامات عند القوة القاهرة مع الإشعار خلال (٣) أيام.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١١</div><div class="art-t">المادة (١١): الأخطاء الطبية</div></div>
+    <div class="art-body">يتحمل الطرف الثاني كامل المسؤولية المهنية عن أي أخطاء طبية ناشئة عن تقديم خدماته.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٢</div><div class="art-t">المادة (١٢): الأنظمة المعمول بها</div></div>
+    <div class="art-body">تخضع الاتفاقية لأنظمة المملكة العربية السعودية ويُسعى لتسوية النزاعات ودياً.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٣</div><div class="art-t">المادة (١٣): السرية والبيانات</div></div>
+    <div class="art-body">يلتزم الطرفان بسرية المعلومات والبيانات الصحية وفق أنظمة حماية البيانات الشخصية.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٤</div><div class="art-t">المادة (١٤): بيانات التواصل</div></div>
+    <div class="art-body">
+      <table class="ctbl">
+        <thead><tr><th></th><th>المسمى</th><th>الاسم</th><th>الجوال</th><th>البريد</th></tr></thead>
+        <tbody>
+          <tr><td class="ptd" rowspan="3">الطرف الأول</td><td>المنسق الطبي</td><td>أ. مازن غانم</td><td dir="ltr">0507158785</td><td dir="ltr">proj01@enayah.org.sa</td></tr>
+          <tr><td>إدارة الشراكات</td><td>—</td><td dir="ltr">0561994060</td><td dir="ltr">stratpart@enayah.org.sa</td></tr>
+          <tr><td>الأمين العام</td><td>د. سلمان المطيري</td><td dir="ltr">920021228</td><td dir="ltr">info@enayah.org.sa</td></tr>
+          <tr><td class="ptd" rowspan="2">الطرف الثاني</td><td>ممثل التوقيع</td><td>${c.rep}</td><td>${c.phone}</td><td dir="ltr">${c.email}</td></tr>
+          <tr><td>المدير المالي</td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٥</div><div class="art-t">المادة (١٥): نسخ الاتفاقية</div></div>
+    <div class="art-body">حررت من نسختين أصليتين باللغة العربية بيد كل طرف نسخة.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٦</div><div class="art-t">المادة (١٦): الملاحق</div></div>
+    <div class="art-body">ملحق أسعار الخدمات جزء لا يتجزأ من هذه الاتفاقية.</div></div>
+
+    ${buildSignatureBlock(c)}
+  </div>`;
+}
+
+function buildGeneral(c){
+  return `
+  <div class="doc-head">
+    <div class="doc-head-row">
+      <div style="display:flex;align-items:center;gap:14px">
+        <img src="https://enayah.sa/wp-content/uploads/sites/2123/2024/05/شعار-جمعية-عناية-01-1.png"
+             alt="عناية" style="height:56px;width:auto;object-fit:contain;filter:brightness(0) invert(1)"
+             onerror="this.style.display='none'"/>
+        <div>
+          <h2>الجمعية الخيرية الصحية لرعاية المرضى (عناية)</h2>
+          <p>اتفاقية شراكة ودعم نوعية — إلكترونية رسمية 🔒</p>
+        </div>
+      </div>
+      <div class="doc-num-box"><small>الرقم المرجعي</small><span>${c.num}</span></div>
+    </div>
+  </div>
+  <div class="doc-strip"></div>
+  <div class="doc-body">
+    <h3>اتفاقية شراكة نوعية</h3>
+    <div class="bismillah">بعون الله تعالى | ${c.contract_date}</div>
+    <div class="intro-box">وفي يوم ${fv(c.contract_date)} بمدينة الرياض، تم إبرام هذه الاتفاقية بين الجمعية الخيرية الصحية لرعاية المرضى (عناية) والطرف الثاني ${fv(c.company)} اتفاقية شراكة ودعم نوعية.</div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١</div><div class="art-t">الطرف الأول:</div></div>
+    <div class="art-body">الجمعية الخيرية الصحية لرعاية المرضى (<strong>عناية</strong>)، ويمثلها <strong>د. سلمان بن عبد الله المطيري</strong> (الأمين العام).</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n" style="background:#555">٢</div><div class="art-t" style="color:#555">الطرف الثاني:</div></div>
+    <div class="art-body">
+      ${fv(c.company)} · ترخيص: ${fv(c.lic)}<br>
+      ممثل التوقيع: <strong>${fv(c.rep)}</strong> (${fv(c.jobtitle)})<br>
+      جوال: ${fv(c.phone)} · بريد: ${fv(c.email)}
+    </div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٣</div><div class="art-t">المادة (٣): موضوع الاتفاقية</div></div>
+    <div class="art-body">تهدف هذه الاتفاقية إلى تنظيم أوجه التعاون والدعم المتبادل بين الطرفين لخدمة المجتمع وتحقيق أهداف الجمعية.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٤</div><div class="art-t">المادة (٤): التزامات الطرف الأول</div></div>
+    <div class="art-body"><ul>
+      <li>التنسيق والتواصل مع الطرف الثاني بشكل منتظم.</li>
+      <li>الإسهام في تنفيذ البرامج والفعاليات المشتركة.</li>
+      <li>توفير المواد التعريفية والتوعوية اللازمة.</li>
+    </ul></div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٥</div><div class="art-t">المادة (٥): التزامات الطرف الثاني</div></div>
+    <div class="art-body"><ul>
+      <li>التعاون مع الطرف الأول في تنفيذ الأنشطة المشتركة.</li>
+      <li>نشر المواد التعريفية الخاصة بالجمعية وفق المتفق عليه.</li>
+      <li>المشاركة في المبادرات الصحية والمجتمعية.</li>
+    </ul></div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٦</div><div class="art-t">المادة (٦): مدة الاتفاقية</div></div>
+    <div class="art-body">سنة واحدة تتجدد تلقائياً ما لم يُشعر أحد الطرفين بعدم التجديد قبل (٣٠) يوماً.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٧</div><div class="art-t">المادة (٧): إنهاء الاتفاقية</div></div>
+    <div class="art-body">يحق لأي طرف الإنهاء بإشعار خطي قبل (٣٠) يوماً.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٨</div><div class="art-t">المادة (٨): السرية</div></div>
+    <div class="art-body">يلتزم الطرفان بسرية المعلومات المتبادلة بينهما.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">٩</div><div class="art-t">المادة (٩): الأنظمة المعمول بها</div></div>
+    <div class="art-body">تخضع الاتفاقية لأنظمة المملكة العربية السعودية.</div></div>
+
+    <div class="art"><div class="art-head"><div class="art-n">١٠</div><div class="art-t">المادة (١٠): أحكام عامة</div></div>
+    <div class="art-body">أي تعديل يكون بموجب ملحق مكتوب موقع من الطرفين.</div></div>
+
+    ${buildSignatureBlock(c)}
+  </div>`;
+}
+
+function buildSignatureBlock(c){
+  return `
+  <div class="sign-row">
+    <div class="sign-col done-col">
+      <h4>الطرف الأول</h4>
+      <div class="srep">الجمعية الخيرية الصحية (عناية)<br>د. سلمان بن عبد الله المطيري</div>
+      <div class="sig-svg">
+        <svg width="160" height="44" viewBox="0 0 160 44" fill="none">
+          <path d="M8 38 C14 32 20 22 26 20 C30 18 33 22 36 18 C40 14 42 8 48 10 C52 11 50 18 54 16 C58 13 60 8 66 10 C70 11 69 18 73 15 C77 12 80 7 86 9 C90 11 89 18 93 15 C97 12 100 7 106 9 C110 11 109 18 113 15 C117 11 120 7 126 9 C130 11 130 18 134 15" stroke="#1a3050" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M6 42 C40 40 80 41 140 40" stroke="#1a3050" stroke-width="1" opacity=".3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="sig-label">التوقيع &nbsp;|&nbsp; الختم</div>
+      <div style="margin-top:6px;font-size:11px;color:#059669;font-weight:600">✓ موقّع مسبقاً</div>
+    </div>
+    <div class="sign-col wait-col">
+      <h4>الطرف الثاني</h4>
+      <div class="srep">${c.company||'—'}<br>${c.rep||'—'}</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">التوقيع &nbsp;|&nbsp; الختم</div>
+      <div style="margin-top:6px;font-size:11px;color:#b45309;font-weight:600">⏳ في انتظار التوقيع</div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════
+// STEP 4: SAVE & SEND
+// ══════════════════════════════════
+async function goS4(){
+  show('s4'); hide('s3'); setStep(4);
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  var c = currentContract;
+  var token = Math.random().toString(36).substr(2,4) + Date.now().toString(36).slice(-4); // short unique code
+  c.code = token;
+
+  var baseUrl = (CFG.base_url || window.location.origin + window.location.pathname.replace('index.html','')).replace(/\/$/, '');
+
+  // Short link (preferred): full contract is stored in Supabase, only the code travels in the URL.
+  // Long link (fallback): if Supabase isn't configured, embed the data so the page still works offline.
+  var signUrl;
+  if(sbClient){
+    signUrl = baseUrl + '/sign.html?id=' + token;
+  } else {
+    signUrl = baseUrl + '/sign.html?' + new URLSearchParams({
+      id: token, num: c.num, type: c.type,
+      company: c.company, rep: c.rep, jobtitle: c.jobtitle,
+      phone: c.phone, email: c.email, lic: c.lic,
+      addr: c.addr, tel: c.tel, po: c.po,
+      date: c.contract_date,
+      notify: CFG.notify, notify_email: CFG.notify_email,
+      expires: Date.now() + 7*24*60*60*1000
+    }).toString();
+  }
+
+  currentSignLink = signUrl;
+
+  // Build messages
+  var typeLabel = c.type === 'health' ? 'الاتفاقية الصحية' : 'اتفاقية الشراكة النوعية';
+  currentWAMsg = 'السلام عليكم، ' + c.rep + ' 🤝\n\nتتشرف الجمعية الخيرية الصحية لرعاية المرضى (عناية) بإرسال ' + typeLabel + ' الخاصة بـ ' + c.company + '.\n\n📋 الرقم المرجعي: ' + c.num + '\n\nيرجى الاطلاع على جميع بنود الاتفاقية والتوقيع إلكترونياً عبر الرابط:\n' + signUrl + '\n\nالرابط صالح لمدة ٧ أيام. سيصلكم نسخة موقعة فور اكتمال التوقيع. 🌿\n\nالجمعية الخيرية الصحية (عناية) | 📞 920021228';
+  currentEmMsg = currentWAMsg;
+
+  // Progress animations
+  var steps = [
+    {id:'pr1', delay:700,  icon:'✅', txt:'تم إنشاء الاتفاقية وتوليد رابط التوقيع الفريد'},
+    {id:'pr2', delay:1500, icon:'💾', txt:'تم حفظ الاتفاقية في قاعدة البيانات'},
+    {id:'pr3', delay:2200, icon:'💬', txt:'واتساب جاهز — اضغط الزر لإرسال الرسالة'},
+    {id:'pr4', delay:2900, icon:'📧', txt:'إيميل جاهز — اضغط الزر لإرسال الرسالة'},
+  ];
+
+  steps.forEach(function(s,i){
+    var prev = i===0 ? 100 : steps[i-1].delay;
+    setTimeout(function(){ document.getElementById(s.id).querySelector('.prog-ico').classList.add('spinning'); }, prev);
+    setTimeout(function(){
+      var item = document.getElementById(s.id);
+      item.querySelector('.prog-ico').classList.remove('spinning');
+      item.querySelector('.prog-ico').textContent = s.icon;
+      item.querySelector('.prog-txt').textContent = s.txt;
+      item.classList.add('done');
+    }, s.delay);
+  });
+
+  // Save to Supabase (source of truth)
+  var saveOk = false;
+  if(sbClient){
+    try {
+      var ins = await sbClient.from('contracts').insert([{
+        code: token, num: c.num, type: c.type,
+        company: c.company, rep: c.rep, jobtitle: c.jobtitle,
+        phone: c.phone, email: c.email, lic: c.lic,
+        addr: c.addr, tel: c.tel, po: c.po,
+        contract_date: c.contract_date,
+        notify: CFG.notify, notify_email: CFG.notify_email,
+        status: 'sent',
+        created_by: (CURRENT_USER ? CURRENT_USER.id : null)
+      }]).select('id').limit(1);
+      if(!ins.error && ins.data && ins.data.length){
+        saveOk = true;
+        try{
+          await sbClient.from('audit_log').insert([
+            {contract_id: ins.data[0].id, contract_code: token, event:'created', actor: CURRENT_USER && CURRENT_USER.id},
+            {contract_id: ins.data[0].id, contract_code: token, event:'sent',    actor: CURRENT_USER && CURRENT_USER.id}
+          ]);
+        }catch(e){ console.warn('audit failed', e); }
+      } else { console.warn('insert error', ins.error); }
+    } catch(e){ console.warn('Supabase save failed:', e); }
+  }
+
+  c.signUrl = signUrl;
+  c.date = new Date().toLocaleDateString('ar-SA');
+  c.time = new Date().toLocaleTimeString('ar-SA');
+  updateBadge();
+
+  setTimeout(function(){
+    if(saveOk){
+      document.getElementById('s4title').textContent = '✅ تم الحفظ في قاعدة البيانات — جاهز للإرسال';
+    } else {
+      document.getElementById('s4title').textContent = '⚠️ تعذّر الحفظ في قاعدة البيانات';
+    }
+    document.getElementById('s_detail').innerHTML = 'الرقم المرجعي: <strong>' + c.num + '</strong> · ' + c.phone + ' · ' + c.email +
+      (saveOk ? '' : '<br><span style="color:#b91c1c;font-size:12px">لم يُحفظ العقد. تحقق من الاتصال وأعد المحاولة.</span>');
+    document.getElementById('linkDisplay').textContent = signUrl;
+    document.getElementById('successWrap').classList.add('show');
+    document.getElementById('sendActions').style.display = saveOk ? 'block' : 'none';
+  }, 3200);
+}
+
+function openWA(){
+  var phone = currentContract.phone.replace(/\D/g,'');
+  if(phone.startsWith('0')) phone = '966' + phone.substring(1);
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(currentWAMsg), '_blank');
+}
+
+function openEmail(){
+  var typeLabel = currentContract.type === 'health' ? 'اتفاقية صحية' : 'اتفاقية شراكة نوعية';
+  var subject = encodeURIComponent(typeLabel + ' — الجمعية الخيرية الصحية (عناية) — رقم المرجع: ' + currentContract.num);
+  var body = encodeURIComponent(currentEmMsg);
+  window.open('mailto:' + currentContract.email + '?subject=' + subject + '&body=' + body, '_blank');
+}
+
+function copyLink(){
+  if(navigator.clipboard) navigator.clipboard.writeText(currentSignLink);
+  showToast('✅ تم نسخ رابط التوقيع');
+}
+
+// ══════════════════════════════════
+// LOAD CONTRACTS LIST
+// ══════════════════════════════════
+async function loadContracts(){
+  var listBody = document.getElementById('listBody');
+  var all = [];
+
+  if(sbClient){
+    try {
+      var { data } = await sbClient.from('contracts').select('*').order('created_at',{ascending:false});
+      if(data) all = data;
+    } catch(e){ console.warn(e); }
+  }
+
+  // Update stats
+  var signed = all.filter(function(c){ return c.status==='signed'; }).length;
+  var pending = all.filter(function(c){ return c.status==='sent' || c.status==='opened'; }).length;
+  document.getElementById('stat_total').textContent = all.length;
+  document.getElementById('stat_pending').textContent = pending;
+  document.getElementById('stat_signed').textContent = signed;
+  document.getElementById('listSub') && (document.getElementById('listSub').textContent = all.length + ' اتفاقية · ' + signed + ' موقعة');
+
+  if(!all.length){
+    listBody.innerHTML = '<div style="text-align:center;padding:2.5rem;color:#aaa;font-size:13px">لا توجد اتفاقيات بعد</div>';
+    window._allContracts = [];
+    return;
+  }
+
+  // Store for detail + search
+  window._allContracts = all;
+  renderRows();
+}
+
+// render list rows, honoring the search box
+function renderRows(){
+  var all = window._allContracts || [];
+  var listBody = document.getElementById('listBody');
+  var q = (document.getElementById('searchBox') ? document.getElementById('searchBox').value.trim().toLowerCase() : '');
+
+  var rows = all.map(function(c, i){ return {c:c, i:i}; });
+  if(q){
+    rows = rows.filter(function(r){
+      var c = r.c;
+      return ((c.num||'') + ' ' + (c.company||'') + ' ' + (c.rep||'') + ' ' + (c.phone||'') + ' ' + (c.email||'')).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  if(!rows.length){
+    listBody.innerHTML = '<div style="text-align:center;padding:2.5rem;color:#aaa;font-size:13px">لا توجد نتائج مطابقة للبحث</div>';
+    return;
+  }
+
+  listBody.innerHTML = '<div class="clist">' + rows.map(function(r){
+    var c = r.c, i = r.i;
+    var badge = c.status === 'signed'
+      ? '<span class="cbadge b-signed">موقّعة ✓</span>'
+      : '<span class="cbadge b-sent">بانتظار التوقيع</span>';
+    var typeIcon = c.type === 'health' ? '🏥' : '🤝';
+    return '<div class="crow" onclick="openDetail(' + i + ',this)" data-idx="' + i + '">' +
+      '<div class="cav">' + typeIcon + '</div>' +
+      '<div class="cinfo"><div class="cname">' + esc(c.company) + '</div>' +
+      '<div class="cmeta"><strong>' + esc(c.num) + '</strong> · ' + esc(c.rep||'') + ' · ' + esc(c.date||c.contract_date||'') + '</div></div>' +
+      badge + '</div>';
+  }).join('') + '</div>';
+}
+
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function updateBadge(){
+  var n = (window._allContracts && window._allContracts.length) || 0;
+  document.getElementById('nb').textContent = n;
+}
+
+function signUrlFor(c){
+  if(c.signUrl) return c.signUrl;
+  var base = (CFG.base_url || '').replace(/\/$/, '');
+  return base + '/sign.html?id=' + (c.code || '');
+}
+
+// ══════════════════════════════════
+// DETAIL VIEW
+// ══════════════════════════════════
+function openDetail(i){
+  var all = window._allContracts || [];
+  var c = all[i];
+  c.signUrl = signUrlFor(c);
+  document.getElementById('listMain').style.display = 'none';
+  var dv = document.getElementById('detailMain'); dv.classList.add('open');
+
+  var statusBadge = c.status === 'signed'
+    ? '<span class="cbadge b-signed" style="font-size:12px">✅ موقّعة</span>'
+    : '<span class="cbadge b-sent" style="font-size:12px">⏳ بانتظار التوقيع</span>';
+
+  var signRow = c.status === 'signed'
+    ? '<tr><td>وقت التوقيع</td><td style="color:var(--g)">' + (c.signed_at||'—') + '</td></tr><tr><td>كود التأكيد</td><td><code style="font-size:11px;background:#f5f5f5;padding:2px 6px;border-radius:4px">' + (c.sign_code||'—') + '</code></td></tr>'
+    : '';
+
+  var createdStr = c.date || (c.created_at ? new Date(c.created_at).toLocaleString('ar-SA') : '—');
+  var emailRow = c.email_status
+    ? '<tr><td>حالة البريد</td><td>' + (c.email_status==='sent'?'✅ أُرسل':'⚠️ فشل') + ' · ' + (c.email_sent_at ? new Date(c.email_sent_at).toLocaleString('ar-SA') : '') + '</td></tr>'
+    : '';
+
+  dv.querySelector('#detailBody').innerHTML =
+    '<div class="card"><div class="card-title">📋 ' + c.num + ' &nbsp; ' + statusBadge + '</div>' +
+    '<table class="info-tbl">' +
+    '<tr><td>نوع الاتفاقية</td><td>' + (c.type==='health'?'🏥 اتفاقية صحية':'🤝 اتفاقية نوعية') + '</td></tr>' +
+    '<tr><td>المنشأة</td><td>' + c.company + '</td></tr>' +
+    '<tr><td>ممثل التوقيع</td><td>' + (c.rep||'—') + '</td></tr>' +
+    '<tr><td>المسمى</td><td>' + (c.jobtitle||'—') + '</td></tr>' +
+    '<tr><td>الجوال</td><td dir="ltr" style="text-align:right">' + (c.phone||'—') + '</td></tr>' +
+    '<tr><td>الإيميل</td><td dir="ltr" style="text-align:right">' + (c.email||'—') + '</td></tr>' +
+    '<tr><td>تاريخ الإنشاء</td><td>' + createdStr + '</td></tr>' +
+    emailRow + signRow + '</table></div>' +
+
+    '<div class="card"><div class="card-title">📅 سجل الأحداث</div><div class="tl">' +
+    '<div class="tl-row"><div class="tld dot-b"></div><div class="tlt">تم إنشاء الاتفاقية وإرسالها</div><div class="tltime">' + createdStr + '</div></div>' +
+    (c.status==='signed'
+      ? '<div class="tl-row"><div class="tld dot-g"></div><div class="tlt" style="color:var(--g);font-weight:700">✅ وقّع الطرف الثاني — الاتفاقية مكتملة</div><div class="tltime">' + (c.signed_at? new Date(c.signed_at).toLocaleString('ar-SA') : '—') + '</div></div>'
+      : '<div class="tl-row"><div class="tld dot-a"></div><div class="tlt">⏳ بานتظار توقيع الطرف الثاني</div><div class="tltime">—</div></div>') +
+    '</div></div>' +
+
+    (c.signUrl ? '<div class="card"><div class="card-title">🔗 رابط التوقيع</div>' +
+    '<div class="link-box"><span>' + c.signUrl + '</span><button class="copy-btn" onclick="navigator.clipboard.writeText(\'' + c.signUrl.replace(/'/g,"\\'") + '\');showToast(\'✅ تم النسخ\')">نسخ</button></div>' +
+    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm btn-primary" onclick="reopenWA(\'' + i + '\')">💬 أرسل واتساب مجدداً</button>' +
+    (c.status!=='signed' ? '<button class="btn btn-sm" onclick="markSigned(' + i + ')">✅ وضّح كموقّعة يدوياً</button>' : '') +
+    '</div></div>' : '') +
+
+    (c.status==='signed' ? '<div class="card"><div class="card-title">📄 النسخة الموقّعة</div>' +
+    '<div style="font-size:13px;color:var(--gray);margin-bottom:10px">نزّل نسخة PDF من العقد الموقّع تتضمن الرقم المرجعي وتوقيع الطرفين.</div>' +
+    '<button class="btn btn-sm btn-primary" onclick="downloadSignedPDF(' + i + ')">⬇️ تحميل PDF موقّع</button>' +
+    '</div>' : '');
+}
+
+function reopenWA(i){
+  var all = window._allContracts || [];
+  var c = all[i];
+  var phone = (c.phone||'').replace(/\D/g,'');
+  if(phone.startsWith('0')) phone = '966'+phone.substring(1);
+  var url = signUrlFor(c);
+  var typeLabel = c.type==='health' ? 'الاتفاقية الصحية' : 'اتفاقية الشراكة النوعية';
+  var msg = 'السلام عليكم، '+c.rep+' 🤝\n\nتذكير: '+typeLabel+' الخاصة بـ '+c.company+' (الرقم المرجعي: '+c.num+') في انتظار توقيعكم:\n'+url+'\n\n📞 920021228';
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+async function markSigned(i){
+  var all = window._allContracts || [];
+  var c = all[i];
+  var when = new Date().toISOString();
+  var code = 'MANUAL-' + Date.now().toString(36).toUpperCase();
+  if(sbClient){
+    try {
+      await sbClient.from('contracts').update({status:'signed',signed_at:when,sign_code:code}).eq('id',c.id);
+      await sbClient.from('audit_log').insert([{contract_id:c.id, contract_code:c.code, event:'signed', detail:'manual', actor: CURRENT_USER && CURRENT_USER.id}]);
+    } catch(e){ console.warn(e); }
+  }
+  showToast('✅ تم تحديث الاتفاقية كموقّعة');
+  await loadContracts();
+  openDetail(i);
+}
+
+function closeDetail(){
+  document.getElementById('listMain').style.display = 'block';
+  document.getElementById('detailMain').classList.remove('open');
+  loadContracts();
+}
+
+// ══════════════════════════════════
+// SIGNED PDF (downloadable from dashboard)
+// ══════════════════════════════════
+function signatureFooterHTML(c){
+  var sig = c.signature
+    ? '<img src="' + c.signature + '" style="max-height:70px;max-width:220px"/>'
+    : '<div style="font-style:italic;color:#888;font-size:13px">— التوقيع غير محفوظ —</div>';
+  var signer = c.signer_name || c.rep || '';
+  return '<div style="margin-top:26px;border-top:2px solid #1e6b45;padding-top:18px">' +
+    '<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">' +
+      '<div style="flex:1;min-width:220px;text-align:center">' +
+        '<div style="font-weight:700;color:#1e6b45;margin-bottom:6px">الطرف الأول</div>' +
+        '<div style="font-size:13px">الجمعية الخيرية الصحية لرعاية المرضى (عناية)</div>' +
+        '<div style="font-size:12px;color:#555;margin-top:4px">الأمين العام — د. سلمان بن عبد الله المطيري</div>' +
+        '<svg width="160" height="60" viewBox="0 0 160 60" style="margin-top:4px"><path d="M10 42 q22 -34 44 -4 t44 -2 q18 6 52 -16" stroke="#1a3050" fill="none" stroke-width="2" stroke-linecap="round"/></svg>' +
+      '</div>' +
+      '<div style="flex:1;min-width:220px;text-align:center">' +
+        '<div style="font-weight:700;color:#1e6b45;margin-bottom:6px">الطرف الثاني</div>' +
+        '<div style="font-size:13px">' + esc(c.company||'') + '</div>' +
+        '<div style="font-size:12px;color:#555;margin-top:4px">' + esc(signer) + '</div>' +
+        '<div style="margin-top:6px;min-height:60px;display:flex;align-items:center;justify-content:center">' + sig + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-top:18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;font-size:12px;color:#166534;text-align:center;line-height:1.9">' +
+      '✅ تم التوقيع إلكترونياً وفق أنظمة المملكة العربية السعودية<br>' +
+      'الرقم المرجعي: <strong>' + esc(c.num) + '</strong> · كود التأكيد: <strong>' + esc(c.sign_code||'—') + '</strong><br>' +
+      'وقت التوقيع: ' + esc(c.signed_at||'—') +
+    '</div></div>';
+}
+
+async function downloadSignedPDF(i){
+  var all = window._allContracts || [];
+  var c = all[i];
+  if(typeof html2pdf === 'undefined'){ showToast('⚠️ تعذّر تحميل مكتبة PDF — تحقق من الاتصال'); return; }
+  showToast('⏳ جاري توليد PDF...');
+  var holder = document.getElementById('pdfHolder');
+  holder.innerHTML = '<div id="pdfDoc" style="background:#fff;color:#111;padding:28px;width:760px;font-family:Cairo,sans-serif" dir="rtl">' +
+    buildContractHTML(c) + signatureFooterHTML(c) + '</div>';
+  try{
+    await html2pdf().set({
+      margin:[8,8,8,8],
+      filename:(c.num||'contract') + '-موقّع.pdf',
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy','avoid-all']}
+    }).from(document.getElementById('pdfDoc')).save();
+    showToast('✅ تم تنزيل النسخة الموقّعة');
+  }catch(e){ console.warn(e); showToast('⚠️ فشل توليد PDF'); }
+  holder.innerHTML='';
+}
+
+// ══════════════════════════════════
+// RESET FORM
+// ══════════════════════════════════
+function freshForm(){
+  ['f_company','f_rep','f_phone','f_email','f_lic','f_addr','f_jobtitle','f_po','f_tel','f_num'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('btn2').disabled = true;
+  document.getElementById('successWrap').classList.remove('show');
+  document.getElementById('sendActions').style.display = 'none';
+  var icons=['📄','💾','💬','📧'];
+  var txts=['إنشاء الاتفاقية وتوليد رابط التوقيع الفريد','حفظ الاتفاقية في قاعدة البيانات','فتح واتساب برسالة جاهزة للإرسال','فتح الإيميل برسالة جاهزة للإرسال'];
+  ['pr1','pr2','pr3','pr4'].forEach(function(id,i){
+    var item=document.getElementById(id); item.classList.remove('done');
+    item.querySelector('.prog-ico').classList.remove('spinning');
+    item.querySelector('.prog-ico').textContent=icons[i];
+    item.querySelector('.prog-txt').textContent=txts[i];
+  });
+  currentContract=null; currentSignLink='';
+  show('s1'); hide('s2'); hide('s3'); hide('s4');
+  setStep(1); goPage('send',null);
+}
+
+// ══════════════════════════════════
+// HELPERS
+// ══════════════════════════════════
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+
+function showToast(msg){
+  var t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .5s'; setTimeout(function(){ t.remove(); },500); },3500);
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', function(){
+  bootAuth();
+  document.getElementById('f_date').valueAsDate = new Date();
+  if(location.hash === '#settings') goPage('settings', null);
+});
+window.addEventListener('hashchange', function(){
+  if(location.hash === '#settings') goPage('settings', null);
+});
+</script>
+</body>
+</html>
